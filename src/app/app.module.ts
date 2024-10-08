@@ -1,5 +1,5 @@
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { APP_INITIALIZER, NgModule } from '@angular/core';
+import { APP_INITIALIZER, CUSTOM_ELEMENTS_SCHEMA, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
@@ -71,6 +71,7 @@ function initConfig(config: AppConfig){
     { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },
     AppConfig ,{ provide: APP_INITIALIZER,multi: true, useFactory: initConfig, deps: [AppConfig]}
   ],
+  schemas: [ CUSTOM_ELEMENTS_SCHEMA ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

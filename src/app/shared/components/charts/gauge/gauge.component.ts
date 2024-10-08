@@ -35,7 +35,7 @@ export class GaugeComponent implements OnInit, OnChanges {
 
   ngOnChanges(changes: SimpleChanges): void {
     if(this.gaugeData){
-      this.apexCreatChart();
+      // this.apexCreatChart();
     }
   }
 

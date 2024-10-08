@@ -2,7 +2,7 @@
     <div id="apexChart" *ngIf="chartOptions">
       <p class="title text-center">{{ gaugeData.options.title }}</p>
       <apx-chart 
-        [series]="chartOptions?.series"
+      
         [chart]="chartOptions.chart"
         [plotOptions]="chartOptions.plotOptions"
         [labels]="chartOptions.labels"
@@ -11,4 +11,4 @@
       ></apx-chart>
     </div>
 </div>
-  
+    <!-- [series]="chartOptions?.series" -->
