@@ -19,7 +19,7 @@ import { MapMyIndiaComponent } from './components/maps/map-my-india/map-my-india
 import { TableHeatMapDirective, TableHeatMapCellDirective, TableHeatMapColumnDirective } from './directives/table-heat-map/table-heat-map.directive';
 import { MaterialHeatChartTableComponent } from './components/tables/material-heat-chart-table/material-heat-chart-table.component';
 import { GaugeChartComponent } from './components/charts/gauge-chart/gauge-chart.component';
-import { GaugeComponent } from './components/charts/gauge/gauge.component';
+// import { GaugeComponent } from './components/charts/gauge/gauge.component';
 import { ScatterChartComponent } from './components/scatter-chart/scatter-chart.component';
 import { FilterPanelComponent } from './components/filter-panel/filter-panel.component';
 import { StackedBarComponent } from './components/charts/stacked-bar/stacked-bar.component';
@@ -100,7 +100,7 @@ const DECLARATIONS = [
   TableHeatMapCellDirective,
   TableHeatMapColumnDirective,
   GaugeChartComponent,
-  GaugeComponent,
+  // GaugeComponent,
   ScatterChartComponent,
   FilterPanelComponent,
   StackedBarComponent,

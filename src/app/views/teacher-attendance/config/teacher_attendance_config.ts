@@ -2156,6 +2156,7 @@ export const config = {
             }
         }
     },
+    // bottom table School Wise % Average Teachers Present
     teacher_average_school: {
         "label": "Average Teachers Present",
         "defaultLevel": "state",
