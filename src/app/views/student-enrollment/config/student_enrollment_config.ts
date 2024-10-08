@@ -3292,16 +3292,22 @@ student_attendance_bignumber1: {
             "valueProp": "state_id",
             "hierarchyLevel": "1",
             "timeSeriesQueries": {
-                "bigNumber":`SELECT count(sam.attendance_status) AS enrolled_count
-                FROM student_attendance.student_attendance_master sam
-                WHERE date = (SELECT MAX(date) FROM student_attendance.student_attendance_master);`,
+                "bigNumber":
+                `select count_attendance as enrolled_count from student_attendance.dash1 d where 
+                date=(SELECT MAX(date) from student_attendance.dash1 d2)`,
+                // `SELECT count(sam.attendance_status) AS enrolled_count
+                // FROM student_attendance.student_attendance_master sam
+                // WHERE date = (SELECT MAX(date) FROM student_attendance.student_attendance_master);`,
                 // "bigNumberComparison": "select round(avg(percentage),2) as percentage from ingestion.sac_stds_avg_atd_by_district as t left join ingestion.dimension_master as m on t.district_id = m.district_id where (date between startDate and endDate) and m.state_id={state_id}"
             },
             "actions": {
                 "queries": {
-                    "bigNumber": `SELECT count(sam.attendance_status) AS enrolled_count
-                    FROM student_attendance.student_attendance_master sam
-                    WHERE date = (SELECT MAX(date) FROM student_attendance.student_attendance_master);`,
+                    "bigNumber":
+                    `select count_attendance as enrolled_count from student_attendance.dash1 d where 
+                    date=(SELECT MAX(date) from student_attendance.dash1 d2)`, 
+                    // `SELECT count(sam.attendance_status) AS enrolled_count
+                    // FROM student_attendance.student_attendance_master sam
+                    // WHERE date = (SELECT MAX(date) FROM student_attendance.student_attendance_master);`,
                     // "bigNumberComparison": "select round(avg(percentage),2) as percentage from ingestion.sac_stds_avg_atd_by_district as t left join ingestion.dimension_master as m on t.district_id = m.district_id where (date between startDate and endDate) and m.state_id={state_id}"
                 },
                 "level": "district"
@@ -3311,9 +3317,50 @@ student_attendance_bignumber1: {
     ],
     "options": {
         "bigNumber": {
-            "title": "Total Enrolled Students on 14/03/2024",
+            "title": "Total Enrolled Students",
             "valueSuffix": '',
             "property": 'enrolled_count'
+        }
+    }
+},
+
+student_attendance_bignumber2: {
+    "label": "Total Deenrolled Students",
+    "filters": [
+        {
+            "name": "State",
+            "labelProp": "state_name",
+            "valueProp": "state_id",
+            "hierarchyLevel": "1",
+            "timeSeriesQueries": {
+                "bigNumber":
+                `select (count_attendance-sum_attendance) as deenrolled_count from student_attendance.dash1 d where 
+                date=(SELECT MAX(date) from student_attendance.dash1 d2)`,
+                // `SELECT count(sam.attendance_status)-sum(sam.attendance_status) AS deenrolled_count
+                // FROM student_attendance.student_attendance_master sam
+                // WHERE date = (SELECT MAX(date) FROM student_attendance.student_attendance_master);`,
+                // "bigNumberComparison": "select round(avg(percentage),2) as percentage from ingestion.sac_stds_avg_atd_by_district as t left join ingestio>
+            },
+            "actions": {
+                "queries": {
+                    "bigNumber": 
+                    `select (count_attendance-sum_attendance) as deenrolled_count from student_attendance.dash1 d where 
+                    date=(SELECT MAX(date) from student_attendance.dash1 d2)`,
+                    // `SELECT count(sam.attendance_status)-sum(sam.attendance_status) AS deenrolled_count
+                    // FROM student_attendance.student_attendance_master sam
+                    // WHERE date = (SELECT MAX(date) FROM student_attendance.student_attendance_master);`,
+                    // "bigNumberComparison": "select round(avg(percentage),2) as percentage from ingestion.sac_stds_avg_atd_by_district as t left join inge>
+                },
+                "level": "district"
+            }
+        }
+
+    ],
+    "options": {
+        "bigNumber": {
+            "title": "Today Deenrolled Students",
+            "valueSuffix": '',
+            "property": 'deenrolled_count'
         }
     }
 },

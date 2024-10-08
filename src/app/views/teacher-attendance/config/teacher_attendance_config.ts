@@ -3433,18 +3433,24 @@ export const config = {
                 "valueProp": "state_id",
                 "hierarchyLevel": "1",
                 "timeSeriesQueries": {
-                    "bigNumber": `SELECT
-                    ROUND(sum(ts.attendance_status) * 100 / count(ts.attendance_status),2) AS teaching_present
-                    FROM teacher_attendance.teaching_staff ts
-                    WHERE date = (SELECT MAX(date) FROM teacher_attendance.teaching_staff)`,
+                    "bigNumber": 
+                    `select ROUND((sum_attendance * 100.0 / count_attendance),2) AS teaching_present
+                    FROM teacher_attendance.dash WHERE date = (SELECT MAX(date) FROM teacher_attendance.dash);`,
+                    // `SELECT
+                    // ROUND(sum(ts.attendance_status) * 100 / count(ts.attendance_status),2) AS teaching_present
+                    // FROM teacher_attendance.teaching_staff ts
+                    // WHERE date = (SELECT MAX(date) FROM teacher_attendance.teaching_staff)`,
                     // "bigNumberComparison": "select round(avg(percentage),2) as percentage from ingestion.sac_stds_avg_atd_by_district as t left join ingestion.dimension_master as m on t.district_id = m.district_id where (date between startDate and endDate) and m.state_id={state_id}"
                 },
                 "actions": {
                     "queries": {
-                        "bigNumber": `SELECT
-                        ROUND(sum(ts.attendance_status) * 100 / count(ts.attendance_status),2) AS teaching_present
-                        FROM teacher_attendance.teaching_staff ts
-                        WHERE date = (SELECT MAX(date) FROM teacher_attendance.teaching_staff)`,
+                        "bigNumber": 
+                       `select ROUND((sum_attendance * 100.0 / count_attendance),2) AS teaching_present
+                        FROM teacher_attendance.dash WHERE date = (SELECT MAX(date) FROM teacher_attendance.dash);`,
+                        // `SELECT
+                        // ROUND(sum(ts.attendance_status) * 100 / count(ts.attendance_status),2) AS teaching_present
+                        // FROM teacher_attendance.teaching_staff ts
+                        // WHERE date = (SELECT MAX(date) FROM teacher_attendance.teaching_staff)`,
                         // "bigNumberComparison": "select round(avg(percentage),2) as percentage from ingestion.sac_stds_avg_atd_by_district as t left join ingestion.dimension_master as m on t.district_id = m.district_id where (date between startDate and endDate) and m.state_id={state_id}"
                     },
                     "level": "district"
@@ -3453,7 +3459,7 @@ export const config = {
         ],
         "options": {
             "bigNumber": {
-                "title": "Percentage Of Teacher Present on 14/03/2024 ",
+                "title": "Percentage Of Teacher Present",
                 "valueSuffix": '%',
                 "property": 'teaching_present'
             }
@@ -3468,18 +3474,26 @@ export const config = {
                 "valueProp": "state_id",
                 "hierarchyLevel": "1",
                 "timeSeriesQueries": {
-                    "bigNumber": `SELECT
-                    ROUND(sum(ts.attendance_status) * 100 / count(ts.attendance_status),2) AS nonteaching_present
-                    FROM teacher_attendance.nonteaching_staff ts
-                    WHERE date = (SELECT MAX(date) FROM teacher_attendance.nonteaching_staff)`,
+                    "bigNumber": 
+                    `select ROUND((sum_attendance * 100.0 / count_attendance),2) AS nonteaching_present
+                    FROM teacher_attendance.non_teach_dash ntd  WHERE 
+                        date = (SELECT MAX(date) FROM teacher_attendance.non_teach_dash ntd2); `,
+                    // `SELECT
+                    // ROUND(sum(ts.attendance_status) * 100 / count(ts.attendance_status),2) AS nonteaching_present
+                    // FROM teacher_attendance.nonteaching_staff ts
+                    // WHERE date = (SELECT MAX(date) FROM teacher_attendance.nonteaching_staff)`,
                     // "bigNumberComparison": "select round(avg(percentage),2) as percentage from ingestion.sac_stds_avg_atd_by_district as t left join ingestion.dimension_master as m on t.district_id = m.district_id where (date between startDate and endDate) and m.state_id={state_id}"
                 },
                 "actions": {
                     "queries": {
-                        "bigNumber": `SELECT
-                        ROUND(sum(ts.attendance_status) * 100 / count(ts.attendance_status),2) AS nonteaching_present
-                        FROM teacher_attendance.nonteaching_staff ts
-                        WHERE date = (SELECT MAX(date) FROM teacher_attendance.nonteaching_staff)`,
+                        "bigNumber": 
+                        `select ROUND((sum_attendance * 100.0 / count_attendance),2) AS nonteaching_present
+                        FROM teacher_attendance.non_teach_dash ntd  WHERE 
+                            date = (SELECT MAX(date) FROM teacher_attendance.non_teach_dash ntd2); `,
+                                                // `SELECT
+                        // ROUND(sum(ts.attendance_status) * 100 / count(ts.attendance_status),2) AS nonteaching_present
+                        // FROM teacher_attendance.nonteaching_staff ts
+                        // WHERE date = (SELECT MAX(date) FROM teacher_attendance.nonteaching_staff)`,
                         // "bigNumberComparison": "select round(avg(percentage),2) as percentage from ingestion.sac_stds_avg_atd_by_district as t left join ingestion.dimension_master as m on t.district_id = m.district_id where (date between startDate and endDate) and m.state_id={state_id}"
                     },
                     "level": "district"
@@ -3488,7 +3502,7 @@ export const config = {
         ],
         "options": {
             "bigNumber": {
-                "title": "Percentage of Non Teaching Staff Present on 14/03/2024",
+                "title": "Percentage of Non Teaching Staff Present",
                 "valueSuffix": '%',
                 "property": 'nonteaching_present'
             }
