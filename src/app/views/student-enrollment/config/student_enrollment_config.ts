@@ -21,7 +21,7 @@ export const config = {
 
 			labelProp: 'class_name',
 
-			valueProp: 'class_id',
+			valueProp: 'class_name',
 
 			id: 'class',
 
@@ -101,93 +101,77 @@ export const config = {
                     SUM(date2_count) AS total_date2_count,
                     SUM(enrolled) AS enrolled,
                     SUM(deenrolled) AS total_deenrolled
-                FROM (
-                    SELECT
-                        district_id,
-                        district_name,
-                        date1_count,
-                        date2_count,
-                        SUM(CASE WHEN student_count_change < 0 THEN 0 else student_count_change END) AS enrolled,
-                        SUM(CASE WHEN student_count_change < 0 THEN ABS(student_count_change) ELSE 0 END) AS deenrolled
-                    FROM (
-                        SELECT
-                            sam.district_id,
-                            d.district_name,
-                            COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END) AS date1_count,
-                            COUNT(CASE WHEN sam.date = endDate THEN sam.attendance_status END) AS date2_count,
-                            COUNT(CASE WHEN sam.date = endDate THEN sam.attendance_status END) - COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END) AS student_count_change
-                        FROM
-                            student_attendance.student_attendance_master sam 
-                        LEFT JOIN
-                            dimensions.district d ON sam.district_id = d.district_id 
-                       LEFT join
-                   dimensions.block b on sam.block_id = b.block_id 
-                            left join 
-                    dimensions.cluster c on sam.cluster_id = c.cluster_id 
-                    left join 
-                    dimensions.school sch on sam.school_id = sch.school_id
-                               LEFT JOIN
-                            dimensions.class cc ON sam.class_id = cc.class_id 
-                        WHERE
-                            sam.date IN (startDate, endDate)   
-                        GROUP BY
-                             sam.district_id, d.district_name, sam.block_id, sam.cluster_id, sam.school_id
-                    ) AS subquery
-                    GROUP BY
-                        district_id,district_name ,date1_count, date2_count
-                ) AS state_query
+                FROM (                        
+SELECT
+    district_id,
+    district_name,
+    date1_count,
+    date2_count,
+    SUM(CASE WHEN student_count_change < 0 THEN 0 ELSE student_count_change END) AS enrolled,
+    SUM(CASE WHEN student_count_change < 0 THEN ABS(student_count_change) ELSE 0 END) AS deenrolled
+FROM (
+    SELECT
+        sam.district_id,
+        sam.district_name,
+        SUM(CASE WHEN sam.date = startDate THEN sam.count_attendance END) AS date1_count,
+        SUM(CASE WHEN sam.date = endDate THEN sam.count_attendance END) AS date2_count,
+        SUM(CASE WHEN sam.date = endDate THEN sam.count_attendance ELSE 0 END) -
+        SUM(CASE WHEN sam.date = startDate THEN sam.count_attendance ELSE 0 END) AS student_count_change
+    FROM
+        student_attendance.stud_avg_school sam
+        join
+        dimensions.class cc on sam.class = cc.class_id
+    WHERE
+        sam.date IN (startDate , endDate)   
+    GROUP BY
+        sam.district_id, sam.district_name        
+) AS subquery
+GROUP BY
+    district_id, district_name, date1_count, date2_count ) AS state_query
                 GROUP BY
                     district_id,
-                    district_name
+                    district_name;
                 `,
                 },
                 "actions": {
                     "queries": {
                         "table": `SELECT
-                        district_id,
-                        district_name,
-                        SUM(date1_count) AS total_date1_count,
-                        SUM(date2_count) AS total_date2_count,
-                        SUM(enrolled) AS enrolled,
-                        SUM(deenrolled) AS total_deenrolled
-                    FROM (
-                        SELECT
-                            district_id,
-                            district_name,
-                            date1_count,
-                            date2_count,
-                            SUM(CASE WHEN student_count_change < 0 THEN 0 else student_count_change END) AS enrolled,
-                            SUM(CASE WHEN student_count_change < 0 THEN ABS(student_count_change) ELSE 0 END) AS deenrolled
-                        FROM (
-                            SELECT
-                                sam.district_id,
-                                d.district_name,
-                                COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END) AS date1_count,
-                                COUNT(CASE WHEN sam.date = endDate THEN sam.attendance_status END) AS date2_count,
-                                COUNT(CASE WHEN sam.date = endDate THEN sam.attendance_status END) - COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END) AS student_count_change
-                            FROM
-                                student_attendance.student_attendance_master sam 
-                            LEFT JOIN
-                                dimensions.district d ON sam.district_id = d.district_id 
-                           LEFT join
-                       dimensions.block b on sam.block_id = b.block_id 
-                                left join 
-                        dimensions.cluster c on sam.cluster_id = c.cluster_id 
-                        left join 
-                        dimensions.school sch on sam.school_id = sch.school_id
-                                   LEFT JOIN
-                                dimensions.class cc ON sam.class_id = cc.class_id 
-                            WHERE
-                                sam.date IN (startDate, endDate)   
-                            GROUP BY
-                                 sam.district_id, d.district_name, sam.block_id, sam.cluster_id, sam.school_id
-                        ) AS subquery
-                        GROUP BY
-                            district_id,district_name ,date1_count, date2_count
-                    ) AS state_query
-                    GROUP BY
-                        district_id,
-                        district_name
+                    district_id,
+                    district_name,
+                    SUM(date1_count) AS total_date1_count,
+                    SUM(date2_count) AS total_date2_count,
+                    SUM(enrolled) AS enrolled,
+                    SUM(deenrolled) AS total_deenrolled
+                FROM (                        
+SELECT
+    district_id,
+    district_name,
+    date1_count,
+    date2_count,
+    SUM(CASE WHEN student_count_change < 0 THEN 0 ELSE student_count_change END) AS enrolled,
+    SUM(CASE WHEN student_count_change < 0 THEN ABS(student_count_change) ELSE 0 END) AS deenrolled
+FROM (
+    SELECT
+        sam.district_id,
+        sam.district_name,
+        SUM(CASE WHEN sam.date = startDate THEN sam.count_attendance END) AS date1_count,
+        SUM(CASE WHEN sam.date = endDate THEN sam.count_attendance END) AS date2_count,
+        SUM(CASE WHEN sam.date = endDate THEN sam.count_attendance ELSE 0 END) -
+        SUM(CASE WHEN sam.date = startDate THEN sam.count_attendance ELSE 0 END) AS student_count_change
+    FROM
+        student_attendance.stud_avg_school sam
+        join
+        dimensions.class cc on sam.class = cc.class_id
+    WHERE
+        sam.date IN (startDate , endDate)   
+    GROUP BY
+        sam.district_id, sam.district_name        
+) AS subquery
+GROUP BY
+    district_id, district_name, date1_count, date2_count ) AS state_query
+                GROUP BY
+                    district_id,
+                    district_name;
                     `,
                     },
                     "level": "district"
@@ -206,94 +190,78 @@ export const config = {
                     SUM(date2_count) AS total_date2_count,
                     SUM(enrolled) AS enrolled,
                     SUM(deenrolled) AS total_deenrolled
-                FROM (
-                    SELECT
-                        block_id,
-                        block_name,
-                        date1_count,
-                        date2_count,
-                        SUM(CASE WHEN student_count_change < 0 THEN 0 else student_count_change END) AS enrolled,
-                        SUM(CASE WHEN student_count_change < 0 THEN ABS(student_count_change) ELSE 0 END) AS deenrolled
-                    FROM (
-                        SELECT
-                            sam.block_id,
-                            b.block_name,
-                            COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END) AS date1_count,
-                            COUNT(CASE WHEN sam.date = endDate THEN sam.attendance_status END) AS date2_count,
-                            COUNT(CASE WHEN sam.date = endDate THEN sam.attendance_status END) - COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END) AS student_count_change
-                        FROM
-                            student_attendance.student_attendance_master sam 
-                        LEFT JOIN
-                            dimensions.district d ON sam.district_id = d.district_id 
-                        LEFT JOIN
-                            dimensions.block b ON sam.block_id = b.block_id 
-                            left join 
-                        dimensions.cluster c on sam.cluster_id = c.cluster_id 
-                    left join 
-                        dimensions.school sch on sam.school_id = sch.school_id
-                        LEFT JOIN
-                            dimensions.class cc ON sam.class_id = cc.class_id 
-                        WHERE
-                            sam.date IN (startDate, endDate)   AND sam.district_id = {district_id}
-                        GROUP BY
-                             sam.block_id, b.block_name, sam.cluster_id, sam.school_id
-                    ) AS subquery
-                    GROUP BY
-                        block_id,block_name ,date1_count, date2_count
-                ) AS district_query
+                FROM (                        
+SELECT
+    block_id,
+    block_name,
+    date1_count,
+    date2_count,
+    SUM(CASE WHEN student_count_change < 0 THEN 0 ELSE student_count_change END) AS enrolled,
+    SUM(CASE WHEN student_count_change < 0 THEN ABS(student_count_change) ELSE 0 END) AS deenrolled
+FROM (
+    SELECT
+        sam.block_id,
+        sam.block_name,
+        SUM(CASE WHEN sam.date = startDate THEN sam.count_attendance END) AS date1_count,
+        SUM(CASE WHEN sam.date = endDate THEN sam.count_attendance END) AS date2_count,
+        SUM(CASE WHEN sam.date = endDate THEN sam.count_attendance ELSE 0 END) - 
+        SUM(CASE WHEN sam.date = startDate THEN sam.count_attendance ELSE 0 END) AS student_count_change
+    FROM
+        student_attendance.stud_avg_school sam 
+		join
+        dimensions.class cc on sam.class = cc.class_id
+    WHERE
+        sam.date IN (startDate , endDate)  and district_id = {district_id} 
+    GROUP BY
+        sam.block_id, sam.block_name        
+) AS subquery
+GROUP BY
+    block_id, block_name, date1_count, date2_count ) AS district_query
                 GROUP BY
                     block_id,
-                    block_name
+                    block_name ;
                 
                  `,
                 },
                 "actions": {
                     "queries": {
                         "table": `SELECT
-                        block_id,
-                        block_name,
-                        SUM(date1_count) AS total_date1_count,
-                        SUM(date2_count) AS total_date2_count,
-                        SUM(enrolled) AS enrolled,
-                        SUM(deenrolled) AS total_deenrolled
-                    FROM (
-                        SELECT
-                            block_id,
-                            block_name,
-                            date1_count,
-                            date2_count,
-                            SUM(CASE WHEN student_count_change < 0 THEN 0 else student_count_change END) AS enrolled,
-                            SUM(CASE WHEN student_count_change < 0 THEN ABS(student_count_change) ELSE 0 END) AS deenrolled
-                        FROM (
-                            SELECT
-                                sam.block_id,
-                                b.block_name,
-                                COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END) AS date1_count,
-                                COUNT(CASE WHEN sam.date = endDate THEN sam.attendance_status END) AS date2_count,
-                                COUNT(CASE WHEN sam.date = endDate THEN sam.attendance_status END) - COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END) AS student_count_change
-                            FROM
-                                student_attendance.student_attendance_master sam 
-                            LEFT JOIN
-                                dimensions.district d ON sam.district_id = d.district_id 
-                            LEFT JOIN
-                                dimensions.block b ON sam.block_id = b.block_id 
-                                left join 
-                            dimensions.cluster c on sam.cluster_id = c.cluster_id 
-                        left join 
-                            dimensions.school sch on sam.school_id = sch.school_id
-                            LEFT JOIN
-                                dimensions.class cc ON sam.class_id = cc.class_id 
-                            WHERE
-                                sam.date IN (startDate, endDate)   AND sam.district_id = {district_id}
-                            GROUP BY
-                                 sam.block_id, b.block_name, sam.cluster_id, sam.school_id
-                        ) AS subquery
-                        GROUP BY
-                            block_id,block_name ,date1_count, date2_count
-                    ) AS district_query
-                    GROUP BY
-                        block_id,
-                        block_name
+                    block_id,
+                    block_name,
+                    SUM(date1_count) AS total_date1_count,
+                    SUM(date2_count) AS total_date2_count,
+                    SUM(enrolled) AS enrolled,
+                    SUM(deenrolled) AS total_deenrolled
+                FROM (                        
+SELECT
+    block_id,
+    block_name,
+    date1_count,
+    date2_count,
+    SUM(CASE WHEN student_count_change < 0 THEN 0 ELSE student_count_change END) AS enrolled,
+    SUM(CASE WHEN student_count_change < 0 THEN ABS(student_count_change) ELSE 0 END) AS deenrolled
+FROM (
+    SELECT
+        sam.block_id,
+        sam.block_name,
+        SUM(CASE WHEN sam.date = startDate THEN sam.count_attendance END) AS date1_count,
+        SUM(CASE WHEN sam.date = endDate THEN sam.count_attendance END) AS date2_count,
+        SUM(CASE WHEN sam.date = endDate THEN sam.count_attendance ELSE 0 END) - 
+        SUM(CASE WHEN sam.date = startDate THEN sam.count_attendance ELSE 0 END) AS student_count_change
+    FROM
+        student_attendance.stud_avg_school sam 
+		join
+        dimensions.class cc on sam.class = cc.class_id
+    WHERE
+        sam.date IN (startDate , endDate)  and district_id = {district_id} 
+    GROUP BY
+        sam.block_id, sam.block_name        
+) AS subquery
+GROUP BY
+    block_id, block_name, date1_count, date2_count ) AS district_query
+                GROUP BY
+                    block_id,
+                    block_name ;
                     
                      `,
                     },
@@ -313,93 +281,77 @@ export const config = {
                     SUM(date2_count) AS total_date2_count,
                     SUM(enrolled) AS enrolled,
                     SUM(deenrolled) AS total_deenrolled
-                FROM (
-                    SELECT
-                        cluster_id,
-                        cluster_name,
-                        date1_count,
-                        date2_count,
-                        SUM(CASE WHEN student_count_change < 0 THEN 0 else student_count_change END) AS enrolled,
-                        SUM(CASE WHEN student_count_change < 0 THEN ABS(student_count_change) ELSE 0 END) AS deenrolled
-                    FROM (
-                        SELECT
-                            sam.cluster_id,
-                            c.cluster_name,
-                            COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END) AS date1_count,
-                            COUNT(CASE WHEN sam.date = endDate THEN sam.attendance_status END) AS date2_count,
-                            COUNT(CASE WHEN sam.date = endDate THEN sam.attendance_status END) - COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END) AS student_count_change
-                        FROM
-                            student_attendance.student_attendance_master sam 
-                        LEFT JOIN
-                            dimensions.district d ON sam.district_id = d.district_id 
-                        LEFT JOIN
-                            dimensions.block b ON sam.block_id = b.block_id 
-                           left join 
-                    dimensions.cluster c on sam.cluster_id = c.cluster_id 
-                    left join 
-                    dimensions.school sch on sam.school_id = sch.school_id 
-                        LEFT JOIN
-                            dimensions.class cc ON sam.class_id = cc.class_id 
-                        WHERE
-                            sam.date IN (startDate, endDate)    AND sam.block_id = {block_id}
-                        GROUP BY
-                             sam.cluster_id, c.cluster_name, sam.school_id
-                    ) AS subquery
-                    GROUP BY
-                        cluster_id,cluster_name ,date1_count, date2_count
-                ) AS block_query
+                FROM (                        
+SELECT
+    cluster_id,
+    cluster_name,
+    date1_count,
+    date2_count,
+    SUM(CASE WHEN student_count_change < 0 THEN 0 ELSE student_count_change END) AS enrolled,
+    SUM(CASE WHEN student_count_change < 0 THEN ABS(student_count_change) ELSE 0 END) AS deenrolled
+FROM (
+    SELECT
+        sam.cluster_id,
+        sam.cluster_name,
+        SUM(CASE WHEN sam.date = startDate THEN sam.count_attendance END) AS date1_count,
+        SUM(CASE WHEN sam.date = endDate THEN sam.count_attendance END) AS date2_count,
+        SUM(CASE WHEN sam.date = endDate THEN sam.count_attendance ELSE 0 END) - 
+        SUM(CASE WHEN sam.date = startDate THEN sam.count_attendance ELSE 0 END) AS student_count_change
+    FROM
+        student_attendance.stud_avg_school sam 
+join
+        dimensions.class cc on sam.class = cc.class_id
+    WHERE
+        sam.date IN (startDate , endDate)  and block_id = {block_id}
+    GROUP BY
+        sam.cluster_id, sam.cluster_name        
+) AS subquery
+GROUP BY
+    cluster_id, cluster_name, date1_count, date2_count ) AS block_query
                 GROUP BY
                     cluster_id,
-                    cluster_name
+                    cluster_name;
                   `,
                 },
                 "actions": {
                     "queries": {
                         "table": `SELECT
-                        cluster_id,
-                        cluster_name,
-                        SUM(date1_count) AS total_date1_count,
-                        SUM(date2_count) AS total_date2_count,
-                        SUM(enrolled) AS enrolled,
-                        SUM(deenrolled) AS total_deenrolled
-                    FROM (
-                        SELECT
-                            cluster_id,
-                            cluster_name,
-                            date1_count,
-                            date2_count,
-                            SUM(CASE WHEN student_count_change < 0 THEN 0 else student_count_change END) AS enrolled,
-                            SUM(CASE WHEN student_count_change < 0 THEN ABS(student_count_change) ELSE 0 END) AS deenrolled
-                        FROM (
-                            SELECT
-                                sam.cluster_id,
-                                c.cluster_name,
-                                COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END) AS date1_count,
-                                COUNT(CASE WHEN sam.date = endDate THEN sam.attendance_status END) AS date2_count,
-                                COUNT(CASE WHEN sam.date = endDate THEN sam.attendance_status END) - COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END) AS student_count_change
-                            FROM
-                                student_attendance.student_attendance_master sam 
-                            LEFT JOIN
-                                dimensions.district d ON sam.district_id = d.district_id 
-                            LEFT JOIN
-                                dimensions.block b ON sam.block_id = b.block_id 
-                               left join 
-                        dimensions.cluster c on sam.cluster_id = c.cluster_id 
-                        left join 
-                        dimensions.school sch on sam.school_id = sch.school_id 
-                            LEFT JOIN
-                                dimensions.class cc ON sam.class_id = cc.class_id 
-                            WHERE
-                                sam.date IN (startDate, endDate)    AND sam.block_id = {block_id}
-                            GROUP BY
-                                 sam.cluster_id, c.cluster_name, sam.school_id
-                        ) AS subquery
-                        GROUP BY
-                            cluster_id,cluster_name ,date1_count, date2_count
-                    ) AS block_query
-                    GROUP BY
-                        cluster_id,
-                        cluster_name
+                    cluster_id,
+                    cluster_name,
+                    SUM(date1_count) AS total_date1_count,
+                    SUM(date2_count) AS total_date2_count,
+                    SUM(enrolled) AS enrolled,
+                    SUM(deenrolled) AS total_deenrolled
+                FROM (                        
+SELECT
+    cluster_id,
+    cluster_name,
+    date1_count,
+    date2_count,
+    SUM(CASE WHEN student_count_change < 0 THEN 0 ELSE student_count_change END) AS enrolled,
+    SUM(CASE WHEN student_count_change < 0 THEN ABS(student_count_change) ELSE 0 END) AS deenrolled
+FROM (
+    SELECT
+        sam.cluster_id,
+        sam.cluster_name,
+        SUM(CASE WHEN sam.date = startDate THEN sam.count_attendance END) AS date1_count,
+        SUM(CASE WHEN sam.date = endDate THEN sam.count_attendance END) AS date2_count,
+        SUM(CASE WHEN sam.date = endDate THEN sam.count_attendance ELSE 0 END) - 
+        SUM(CASE WHEN sam.date = startDate THEN sam.count_attendance ELSE 0 END) AS student_count_change
+    FROM
+        student_attendance.stud_avg_school sam 
+join
+        dimensions.class cc on sam.class = cc.class_id
+    WHERE
+        sam.date IN (startDate , endDate)  and block_id = {block_id}
+    GROUP BY
+        sam.cluster_id, sam.cluster_name        
+) AS subquery
+GROUP BY
+    cluster_id, cluster_name, date1_count, date2_count ) AS block_query
+                GROUP BY
+                    cluster_id,
+                    cluster_name;
                        `,
                     },
                     "level": "cluster"
@@ -418,93 +370,77 @@ export const config = {
                     SUM(date2_count) AS total_date2_count,
                     SUM(enrolled) AS enrolled,
                     SUM(deenrolled) AS total_deenrolled
-                FROM (
-                    SELECT
-                        school_id,
-                        school_name,
-                        date1_count,
-                        date2_count,
-                        SUM(CASE WHEN student_count_change < 0 THEN 0 else student_count_change END) AS enrolled,
-                        SUM(CASE WHEN student_count_change < 0 THEN ABS(student_count_change) ELSE 0 END) AS deenrolled
-                    FROM (
-                        SELECT
-                            sam.school_id,
-                            sch.school_name ,
-                            COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END) AS date1_count,
-                            COUNT(CASE WHEN sam.date = endDate THEN sam.attendance_status END) AS date2_count,
-                            COUNT(CASE WHEN sam.date = endDate THEN sam.attendance_status END) - COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END) AS student_count_change
-                        FROM
-                            student_attendance.student_attendance_master sam 
-                        LEFT JOIN
-                            dimensions.district d ON sam.district_id = d.district_id 
-                        LEFT JOIN
-                            dimensions.block b ON sam.block_id = b.block_id 
-                        left join 
-                    dimensions.cluster c on sam.cluster_id = c.cluster_id 
-                    left join 
-                    dimensions.school sch on sam.school_id = sch.school_id 
-                        LEFT JOIN
-                            dimensions.class cc ON sam.class_id = cc.class_id 
-                        WHERE
-                            sam.date IN (startDate, endDate)   AND sam.cluster_id = {cluster_id}
-                        GROUP BY
-                             sam.school_id, sch.school_name
-                    ) AS subquery
-                    GROUP BY
-                        school_id,school_name, date1_count, date2_count
-                ) AS cluster_query
+                FROM (                        
+SELECT
+    school_id,
+    school_name,
+    date1_count,
+    date2_count,
+    SUM(CASE WHEN student_count_change < 0 THEN 0 ELSE student_count_change END) AS enrolled,
+    SUM(CASE WHEN student_count_change < 0 THEN ABS(student_count_change) ELSE 0 END) AS deenrolled
+FROM (
+    SELECT
+        sam.school_id,
+        sam.school_name,
+        SUM(CASE WHEN sam.date = startDate THEN sam.count_attendance END) AS date1_count,
+        SUM(CASE WHEN sam.date = endDate THEN sam.count_attendance END) AS date2_count,
+        SUM(CASE WHEN sam.date = endDate THEN sam.count_attendance ELSE 0 END) - 
+        SUM(CASE WHEN sam.date = startDate THEN sam.count_attendance ELSE 0 END) AS student_count_change
+    FROM
+        student_attendance.stud_avg_school sam 
+join
+        dimensions.class cc on sam.class = cc.class_id
+    WHERE
+        sam.date IN (startDate,endDate)  and cluster_id = {cluster_id} 
+    GROUP BY
+        sam.school_id, sam.school_name        
+) AS subquery
+GROUP BY
+    school_id, school_name, date1_count, date2_count ) AS block_query
                 GROUP BY
                     school_id,
-                    school_name
+                    school_name ;
                     `
                 },
                 "actions": {
                     "queries": {
                         "table": `SELECT
-                        school_id,
-                        school_name,
-                        SUM(date1_count) AS total_date1_count,
-                        SUM(date2_count) AS total_date2_count,
-                        SUM(enrolled) AS enrolled,
-                        SUM(deenrolled) AS total_deenrolled
-                    FROM (
-                        SELECT
-                            school_id,
-                            school_name,
-                            date1_count,
-                            date2_count,
-                            SUM(CASE WHEN student_count_change < 0 THEN 0 else student_count_change END) AS enrolled,
-                            SUM(CASE WHEN student_count_change < 0 THEN ABS(student_count_change) ELSE 0 END) AS deenrolled
-                        FROM (
-                            SELECT
-                                sam.school_id,
-                                sch.school_name ,
-                                COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END) AS date1_count,
-                                COUNT(CASE WHEN sam.date = endDate THEN sam.attendance_status END) AS date2_count,
-                                COUNT(CASE WHEN sam.date = endDate THEN sam.attendance_status END) - COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END) AS student_count_change
-                            FROM
-                                student_attendance.student_attendance_master sam 
-                            LEFT JOIN
-                                dimensions.district d ON sam.district_id = d.district_id 
-                            LEFT JOIN
-                                dimensions.block b ON sam.block_id = b.block_id 
-                            left join 
-                        dimensions.cluster c on sam.cluster_id = c.cluster_id 
-                        left join 
-                        dimensions.school sch on sam.school_id = sch.school_id 
-                            LEFT JOIN
-                                dimensions.class cc ON sam.class_id = cc.class_id 
-                            WHERE
-                                sam.date IN (startDate, endDate)   AND sam.cluster_id = {cluster_id}
-                            GROUP BY
-                                 sam.school_id, sch.school_name
-                        ) AS subquery
-                        GROUP BY
-                            school_id,school_name, date1_count, date2_count
-                    ) AS cluster_query
-                    GROUP BY
-                        school_id,
-                        school_name
+                    school_id,
+                    school_name,
+                    SUM(date1_count) AS total_date1_count,
+                    SUM(date2_count) AS total_date2_count,
+                    SUM(enrolled) AS enrolled,
+                    SUM(deenrolled) AS total_deenrolled
+                FROM (                        
+SELECT
+    school_id,
+    school_name,
+    date1_count,
+    date2_count,
+    SUM(CASE WHEN student_count_change < 0 THEN 0 ELSE student_count_change END) AS enrolled,
+    SUM(CASE WHEN student_count_change < 0 THEN ABS(student_count_change) ELSE 0 END) AS deenrolled
+FROM (
+    SELECT
+        sam.school_id,
+        sam.school_name,
+        SUM(CASE WHEN sam.date = startDate THEN sam.count_attendance END) AS date1_count,
+        SUM(CASE WHEN sam.date = endDate THEN sam.count_attendance END) AS date2_count,
+        SUM(CASE WHEN sam.date = endDate THEN sam.count_attendance ELSE 0 END) - 
+        SUM(CASE WHEN sam.date = startDate THEN sam.count_attendance ELSE 0 END) AS student_count_change
+    FROM
+        student_attendance.stud_avg_school sam 
+join
+        dimensions.class cc on sam.class = cc.class_id
+    WHERE
+        sam.date IN (startDate,endDate)  and cluster_id = {cluster_id} 
+    GROUP BY
+        sam.school_id, sam.school_name        
+) AS subquery
+GROUP BY
+    school_id, school_name, date1_count, date2_count ) AS block_query
+                GROUP BY
+                    school_id,
+                    school_name ;
                         `,
                     },
                     "level": "school"
@@ -832,6 +768,11 @@ export const config = {
             }
         }
     },
+
+
+
+
+
 //left table for bignumber
 student_comparative_bignumber: {
         "label": "Average Student Present",
@@ -842,95 +783,86 @@ student_comparative_bignumber: {
                 "valueProp": "state_id",
                 "hierarchyLevel": "1",
                 "timeSeriesQueries": {
-                    "bigNumber": `select SUM(total_enrolled) as total_enrolled
+                    "bigNumber": `select SUM(enrolled) as total_enrolled
                     from (SELECT
-                        district_id,
-                        district_name,
-                        SUM(enrolled) AS total_enrolled   
-                    FROM (
-                        SELECT
-                            district_id,
-                            district_name,
-                            date1_count,
-                            date2_count,
-                            SUM(CASE WHEN student_count_change < 0 THEN 0 else student_count_change END) AS enrolled
-                        FROM (
-                            SELECT
-                                sam.district_id,
-                                d.district_name,
-                                COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END) AS date1_count,
-                                COUNT(CASE WHEN sam.date = endDate THEN sam.attendance_status END) AS date2_count,
-                                COUNT(CASE WHEN sam.date = endDate THEN sam.attendance_status END) - COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END) AS student_count_change
-                            FROM
-                                student_attendance.student_attendance_master sam 
-                            LEFT JOIN
-                                dimensions.district d ON sam.district_id = d.district_id 
-                           LEFT join
-                       dimensions.block b on sam.block_id = b.block_id 
-                                left join 
-                        dimensions.cluster c on sam.cluster_id = c.cluster_id 
-                        left join 
-                        dimensions.school sch on sam.school_id = sch.school_id
-                                   LEFT JOIN
-                                dimensions.class cc ON sam.class_id = cc.class_id 
-                            WHERE
-                                sam.date IN (startDate, endDate)  
-                            GROUP BY
-                                 sam.district_id, d.district_name, sam.block_id, sam.cluster_id, sam.school_id
-                        ) AS subquery
-                        GROUP BY
-                            district_id,district_name ,date1_count, date2_count
-                    ) AS state_query
-                    GROUP BY
-                        district_id,
-                        district_name) as tot_query                    `
+                    district_id,
+                    district_name,
+                    SUM(date1_count) AS total_date1_count,
+                    SUM(date2_count) AS total_date2_count,
+                    SUM(enrolled) AS enrolled,
+                    SUM(deenrolled) AS total_deenrolled
+                FROM (                        
+SELECT
+    district_id,
+    district_name,
+    date1_count,
+    date2_count,
+    SUM(CASE WHEN student_count_change < 0 THEN 0 ELSE student_count_change END) AS enrolled,
+    SUM(CASE WHEN student_count_change < 0 THEN ABS(student_count_change) ELSE 0 END) AS deenrolled
+FROM (
+    SELECT
+        sam.district_id,
+        sam.district_name,
+        SUM(CASE WHEN sam.date = startDate THEN sam.count_attendance END) AS date1_count,
+        SUM(CASE WHEN sam.date = endDate THEN sam.count_attendance END) AS date2_count,
+        SUM(CASE WHEN sam.date = endDate THEN sam.count_attendance ELSE 0 END) - 
+        SUM(CASE WHEN sam.date = startDate THEN sam.count_attendance ELSE 0 END) AS student_count_change
+    FROM
+        student_attendance.stud_avg_school sam 
+        join
+        dimensions.class cc on sam.class = cc.class_id
+    WHERE
+        sam.date IN (startDate ,endDate)   
+    GROUP BY
+        sam.district_id, sam.district_name        
+) AS subquery
+GROUP BY
+    district_id, district_name, date1_count, date2_count ) AS state_query
+                GROUP BY
+                    district_id,
+                    district_name) as tot_query;`
 
                 },
                 "actions": {
                     "queries": {
-                        "bigNumber": `select SUM(total_enrolled) as total_enrolled
-                        from (SELECT
-                            district_id,
-                            district_name,
-                            SUM(enrolled) AS total_enrolled   
-                        FROM (
-                            SELECT
-                                district_id,
-                                district_name,
-                                date1_count,
-                                date2_count,
-                                SUM(CASE WHEN student_count_change < 0 THEN 0 else student_count_change END) AS enrolled
-                            FROM (
-                                SELECT
-                                    sam.district_id,
-                                    d.district_name,
-                                    COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END) AS date1_count,
-                                    COUNT(CASE WHEN sam.date = endDate THEN sam.attendance_status END) AS date2_count,
-                                    COUNT(CASE WHEN sam.date = endDate THEN sam.attendance_status END) - COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END) AS student_count_change
-                                FROM
-                                    student_attendance.student_attendance_master sam 
-                                LEFT JOIN
-                                    dimensions.district d ON sam.district_id = d.district_id 
-                               LEFT join
-                           dimensions.block b on sam.block_id = b.block_id 
-                                    left join 
-                            dimensions.cluster c on sam.cluster_id = c.cluster_id 
-                            left join 
-                            dimensions.school sch on sam.school_id = sch.school_id
-                                       LEFT JOIN
-                                    dimensions.class cc ON sam.class_id = cc.class_id 
-                                WHERE
-                                    sam.date IN (startDate, endDate)  
-                                GROUP BY
-                                     sam.district_id, d.district_name, sam.block_id, sam.cluster_id, sam.school_id
-                            ) AS subquery
-                            GROUP BY
-                                district_id,district_name ,date1_count, date2_count
-                        ) AS state_query
-                        GROUP BY
-                            district_id,
-                            district_name) as tot_query
-                        `
+                        "bigNumber": `select SUM(enrolled) as total_enrolled
+                    from (SELECT
+                    district_id,
+                    district_name,
+                    SUM(date1_count) AS total_date1_count,
+                    SUM(date2_count) AS total_date2_count,
+                    SUM(enrolled) AS enrolled,
+                    SUM(deenrolled) AS total_deenrolled
+                FROM (                        
+SELECT
+    district_id,
+    district_name,
+    date1_count,
+    date2_count,
+    SUM(CASE WHEN student_count_change < 0 THEN 0 ELSE student_count_change END) AS enrolled,
+    SUM(CASE WHEN student_count_change < 0 THEN ABS(student_count_change) ELSE 0 END) AS deenrolled
+FROM (
+    SELECT
+        sam.district_id,
+        sam.district_name,
+        SUM(CASE WHEN sam.date = startDate THEN sam.count_attendance END) AS date1_count,
+        SUM(CASE WHEN sam.date = endDate THEN sam.count_attendance END) AS date2_count,
+        SUM(CASE WHEN sam.date = endDate THEN sam.count_attendance ELSE 0 END) - 
+        SUM(CASE WHEN sam.date = startDate THEN sam.count_attendance ELSE 0 END) AS student_count_change
+    FROM
+        student_attendance.stud_avg_school sam 
+        join
+        dimensions.class cc on sam.class = cc.class_id
+    WHERE
+        sam.date IN (startDate ,endDate)   
+    GROUP BY
+        sam.district_id, sam.district_name        
+) AS subquery
+GROUP BY
+    district_id, district_name, date1_count, date2_count ) AS state_query
+                GROUP BY
+                    district_id,
+                    district_name) as tot_query;`
                     },
                     "level": "district"
                 }
@@ -941,95 +873,86 @@ student_comparative_bignumber: {
                 "valueProp": "district_id",
                 "hierarchyLevel": "2",
                 "timeSeriesQueries": {
-                    "bigNumber": `select SUM(total_enrolled) as total_enrolled
+                    "bigNumber": `select SUM(enrolled) as total_enrolled
                     from (SELECT
-                       block_id,
-                       block_name,
-                       SUM(enrolled) AS total_enrolled
-                   FROM (
-                       SELECT
-                           block_id,
-                           block_name,
-                           date1_count,
-                           date2_count,
-                           SUM(CASE WHEN student_count_change < 0 THEN 0 else student_count_change END) AS enrolled
-                       FROM (
-                           SELECT
-                               sam.block_id,
-                               b.block_name,
-                               COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END) AS date1_count,
-                               COUNT(CASE WHEN sam.date = endDate THEN sam.attendance_status END) AS date2_count,
-                               COUNT(CASE WHEN sam.date = endDate THEN sam.attendance_status END) - COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END) AS student_count_change
-                           FROM
-                               student_attendance.student_attendance_master sam 
-                           LEFT JOIN
-                               dimensions.district d ON sam.district_id = d.district_id 
-                           LEFT JOIN
-                               dimensions.block b ON sam.block_id = b.block_id 
-                               left join 
-                           dimensions.cluster c on sam.cluster_id = c.cluster_id 
-                       left join 
-                           dimensions.school sch on sam.school_id = sch.school_id
-                           LEFT JOIN
-                               dimensions.class cc ON sam.class_id = cc.class_id 
-                           WHERE
-                               sam.date IN (startDate, endDate) AND   sam.district_id = {district_id}
-                           GROUP BY
-                                sam.block_id, b.block_name, sam.cluster_id, sam.school_id
-                       ) AS subquery
-                       GROUP BY
-                           block_id,block_name ,date1_count, date2_count
-                   ) AS district_query
-                   GROUP BY
-                       block_id,
-                       block_name) as tot_query
-                        `
+                    block_id,
+                    block_name,
+                    SUM(date1_count) AS total_date1_count,
+                    SUM(date2_count) AS total_date2_count,
+                    SUM(enrolled) AS enrolled,
+                    SUM(deenrolled) AS total_deenrolled
+                FROM (                        
+SELECT
+    block_id,
+    block_name,
+    date1_count,
+    date2_count,
+    SUM(CASE WHEN student_count_change < 0 THEN 0 ELSE student_count_change END) AS enrolled,
+    SUM(CASE WHEN student_count_change < 0 THEN ABS(student_count_change) ELSE 0 END) AS deenrolled
+FROM (
+    SELECT
+        sam.block_id,
+        sam.block_name,
+        SUM(CASE WHEN sam.date = startDate THEN sam.count_attendance END) AS date1_count,
+        SUM(CASE WHEN sam.date = endDate THEN sam.count_attendance END) AS date2_count,
+        SUM(CASE WHEN sam.date = endDate THEN sam.count_attendance ELSE 0 END) - 
+        SUM(CASE WHEN sam.date = startDate THEN sam.count_attendance ELSE 0 END) AS student_count_change
+    FROM
+        student_attendance.stud_avg_school sam 
+join
+        dimensions.class cc on sam.class = cc.class_id
+    WHERE
+        sam.date IN (startDate ,endDate)  and district_id = {district_id}
+
+    GROUP BY
+        sam.block_id, sam.block_name        
+) AS subquery
+GROUP BY
+    block_id, block_name, date1_count, date2_count ) AS district_query
+                GROUP BY
+                    block_id,
+                    block_name ) as tot_query;`
                 },
                 "actions": {
                     "queries": {
-                        "bigNumber": `select SUM(total_enrolled) as total_enrolled
-                        from (SELECT
-                           block_id,
-                           block_name,
-                           SUM(enrolled) AS total_enrolled
-                       FROM (
-                           SELECT
-                               block_id,
-                               block_name,
-                               date1_count,
-                               date2_count,
-                               SUM(CASE WHEN student_count_change < 0 THEN 0 else student_count_change END) AS enrolled
-                           FROM (
-                               SELECT
-                                   sam.block_id,
-                                   b.block_name,
-                                   COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END) AS date1_count,
-                                   COUNT(CASE WHEN sam.date = endDate THEN sam.attendance_status END) AS date2_count,
-                                   COUNT(CASE WHEN sam.date = endDate THEN sam.attendance_status END) - COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END) AS student_count_change
-                               FROM
-                                   student_attendance.student_attendance_master sam 
-                               LEFT JOIN
-                                   dimensions.district d ON sam.district_id = d.district_id 
-                               LEFT JOIN
-                                   dimensions.block b ON sam.block_id = b.block_id 
-                                   left join 
-                               dimensions.cluster c on sam.cluster_id = c.cluster_id 
-                           left join 
-                               dimensions.school sch on sam.school_id = sch.school_id
-                               LEFT JOIN
-                                   dimensions.class cc ON sam.class_id = cc.class_id 
-                               WHERE
-                                   sam.date IN (startDate, endDate) AND   sam.district_id = {district_id}
-                               GROUP BY
-                                    sam.block_id, b.block_name, sam.cluster_id, sam.school_id
-                           ) AS subquery
-                           GROUP BY
-                               block_id,block_name ,date1_count, date2_count
-                       ) AS district_query
-                       GROUP BY
-                           block_id,
-                           block_name) as tot_query
-                            `
+                        "bigNumber": `select SUM(enrolled) as total_enrolled
+                    from (SELECT
+                    block_id,
+                    block_name,
+                    SUM(date1_count) AS total_date1_count,
+                    SUM(date2_count) AS total_date2_count,
+                    SUM(enrolled) AS enrolled,
+                    SUM(deenrolled) AS total_deenrolled
+                FROM (                        
+SELECT
+    block_id,
+    block_name,
+    date1_count,
+    date2_count,
+    SUM(CASE WHEN student_count_change < 0 THEN 0 ELSE student_count_change END) AS enrolled,
+    SUM(CASE WHEN student_count_change < 0 THEN ABS(student_count_change) ELSE 0 END) AS deenrolled
+FROM (
+    SELECT
+        sam.block_id,
+        sam.block_name,
+        SUM(CASE WHEN sam.date = startDate THEN sam.count_attendance END) AS date1_count,
+        SUM(CASE WHEN sam.date = endDate THEN sam.count_attendance END) AS date2_count,
+        SUM(CASE WHEN sam.date = endDate THEN sam.count_attendance ELSE 0 END) - 
+        SUM(CASE WHEN sam.date = startDate THEN sam.count_attendance ELSE 0 END) AS student_count_change
+    FROM
+        student_attendance.stud_avg_school sam 
+join
+        dimensions.class cc on sam.class = cc.class_id
+    WHERE
+        sam.date IN (startDate ,endDate)  and district_id = {district_id}
+    GROUP BY
+        sam.block_id, sam.block_name        
+) AS subquery
+GROUP BY
+    block_id, block_name, date1_count, date2_count ) AS district_query
+                GROUP BY
+                    block_id,
+                    block_name ) as tot_query;`
                     },
                     "level": "block"
                 }
@@ -1041,104 +964,86 @@ student_comparative_bignumber: {
                 "valueProp": "block_id",
                 "hierarchyLevel": "3",
                 "timeSeriesQueries": {
-                    "bigNumber": `select SUM(total_enrolled) as total_enrolled
+                    "bigNumber": `select SUM(enrolled) as total_enrolled
                     from (SELECT
-                       cluster_id,
-                       cluster_name,
-                       SUM(date1_count) AS total_date1_count,
-                       SUM(date2_count) AS total_date2_count,
-                       SUM(enrolled) AS total_enrolled,
-                       SUM(deenrolled) AS total_deenrolled
-                   FROM (
-                       SELECT
-                           cluster_id,
-                           cluster_name,
-                           date1_count,
-                           date2_count,
-                           SUM(CASE WHEN student_count_change < 0 THEN 0 else student_count_change END) AS enrolled,
-                           SUM(CASE WHEN student_count_change < 0 THEN ABS(student_count_change) ELSE 0 END) AS deenrolled
-                       FROM (
-                           SELECT
-                               sam.cluster_id,
-                               c.cluster_name,
-                               COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END) AS date1_count,
-                               COUNT(CASE WHEN sam.date = endDate THEN sam.attendance_status END) AS date2_count,
-                               COUNT(CASE WHEN sam.date = endDate THEN sam.attendance_status END) - COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END) AS student_count_change
-                           FROM
-                               student_attendance.student_attendance_master sam 
-                           LEFT JOIN
-                               dimensions.district d ON sam.district_id = d.district_id 
-                           LEFT JOIN
-                               dimensions.block b ON sam.block_id = b.block_id 
-                              left join 
-                       dimensions.cluster c on sam.cluster_id = c.cluster_id 
-                       left join 
-                       dimensions.school sch on sam.school_id = sch.school_id 
-                           LEFT JOIN
-                               dimensions.class cc ON sam.class_id = cc.class_id 
-                           WHERE
-                               sam.date IN (startDate, endDate)   AND sam.block_id = {block_id}
-                           GROUP BY
-                                sam.cluster_id, c.cluster_name, sam.school_id
-                       ) AS subquery
-                       GROUP BY
-                           cluster_id,cluster_name ,date1_count, date2_count
-                   ) AS block_query
-                   GROUP BY
-                       cluster_id,
-                       cluster_name) as tot_query
-                    `,
+                    cluster_id,
+                    cluster_name,
+                    SUM(date1_count) AS total_date1_count,
+                    SUM(date2_count) AS total_date2_count,
+                    SUM(enrolled) AS enrolled,
+                    SUM(deenrolled) AS total_deenrolled
+                FROM (                        
+SELECT
+    cluster_id,
+    cluster_name,
+    date1_count,
+    date2_count,
+    SUM(CASE WHEN student_count_change < 0 THEN 0 ELSE student_count_change END) AS enrolled,
+    SUM(CASE WHEN student_count_change < 0 THEN ABS(student_count_change) ELSE 0 END) AS deenrolled
+FROM (
+    SELECT
+        sam.cluster_id,
+        sam.cluster_name,
+        SUM(CASE WHEN sam.date = startDate THEN sam.count_attendance END) AS date1_count,
+        SUM(CASE WHEN sam.date = endDate THEN sam.count_attendance END) AS date2_count,
+        SUM(CASE WHEN sam.date = endDate THEN sam.count_attendance ELSE 0 END) - 
+        SUM(CASE WHEN sam.date = startDate THEN sam.count_attendance ELSE 0 END) AS student_count_change
+    FROM
+        student_attendance.stud_avg_school sam 
+join
+        dimensions.class cc on sam.class = cc.class_id
+    WHERE
+        sam.date IN (startDate,endDate)  and block_id = {block_id} 
+    GROUP BY
+        sam.cluster_id, sam.cluster_name        
+) AS subquery
+GROUP BY
+    cluster_id, cluster_name, date1_count, date2_count ) AS block_query
+                GROUP BY
+                    cluster_id,
+                    cluster_name ) as tot_query;`,
                     
                 },
                 "actions": {
                     "queries": {
-                        "bigNumber": `select SUM(total_enrolled) as total_enrolled
-                        from (SELECT
-                           cluster_id,
-                           cluster_name,
-                           SUM(date1_count) AS total_date1_count,
-                           SUM(date2_count) AS total_date2_count,
-                           SUM(enrolled) AS total_enrolled,
-                           SUM(deenrolled) AS total_deenrolled
-                       FROM (
-                           SELECT
-                               cluster_id,
-                               cluster_name,
-                               date1_count,
-                               date2_count,
-                               SUM(CASE WHEN student_count_change < 0 THEN 0 else student_count_change END) AS enrolled,
-                               SUM(CASE WHEN student_count_change < 0 THEN ABS(student_count_change) ELSE 0 END) AS deenrolled
-                           FROM (
-                               SELECT
-                                   sam.cluster_id,
-                                   c.cluster_name,
-                                   COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END) AS date1_count,
-                                   COUNT(CASE WHEN sam.date = endDate THEN sam.attendance_status END) AS date2_count,
-                                   COUNT(CASE WHEN sam.date = endDate THEN sam.attendance_status END) - COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END) AS student_count_change
-                               FROM
-                                   student_attendance.student_attendance_master sam 
-                               LEFT JOIN
-                                   dimensions.district d ON sam.district_id = d.district_id 
-                               LEFT JOIN
-                                   dimensions.block b ON sam.block_id = b.block_id 
-                                  left join 
-                           dimensions.cluster c on sam.cluster_id = c.cluster_id 
-                           left join 
-                           dimensions.school sch on sam.school_id = sch.school_id 
-                               LEFT JOIN
-                                   dimensions.class cc ON sam.class_id = cc.class_id 
-                               WHERE
-                                   sam.date IN (startDate, endDate)   AND sam.block_id = {block_id}
-                               GROUP BY
-                                    sam.cluster_id, c.cluster_name, sam.school_id
-                           ) AS subquery
-                           GROUP BY
-                               cluster_id,cluster_name ,date1_count, date2_count
-                       ) AS block_query
-                       GROUP BY
-                           cluster_id,
-                           cluster_name) as tot_query
-                        `,
+                        "bigNumber": `select SUM(enrolled) as total_enrolled
+                    from (SELECT
+                    cluster_id,
+                    cluster_name,
+                    SUM(date1_count) AS total_date1_count,
+                    SUM(date2_count) AS total_date2_count,
+                    SUM(enrolled) AS enrolled,
+                    SUM(deenrolled) AS total_deenrolled
+                FROM (                        
+SELECT
+    cluster_id,
+    cluster_name,
+    date1_count,
+    date2_count,
+    SUM(CASE WHEN student_count_change < 0 THEN 0 ELSE student_count_change END) AS enrolled,
+    SUM(CASE WHEN student_count_change < 0 THEN ABS(student_count_change) ELSE 0 END) AS deenrolled
+FROM (
+    SELECT
+        sam.cluster_id,
+        sam.cluster_name,
+        SUM(CASE WHEN sam.date = startDate THEN sam.count_attendance END) AS date1_count,
+        SUM(CASE WHEN sam.date = endDate THEN sam.count_attendance END) AS date2_count,
+        SUM(CASE WHEN sam.date = endDate THEN sam.count_attendance ELSE 0 END) - 
+        SUM(CASE WHEN sam.date = startDate THEN sam.count_attendance ELSE 0 END) AS student_count_change
+    FROM
+        student_attendance.stud_avg_school sam 
+join
+        dimensions.class cc on sam.class = cc.class_id
+    WHERE
+        sam.date IN (startDate,endDate)  and block_id = {block_id} 
+    GROUP BY
+        sam.cluster_id, sam.cluster_name        
+) AS subquery
+GROUP BY
+    cluster_id, cluster_name, date1_count, date2_count ) AS block_query
+                GROUP BY
+                    cluster_id,
+                    cluster_name ) as tot_query;`,
                        
                     },
                     "level": "cluster"
@@ -1150,96 +1055,86 @@ student_comparative_bignumber: {
                 "valueProp": "cluster_id",
                 "hierarchyLevel": "4",
                 "timeSeriesQueries": {
-                    "bigNumber": `select SUM(total_enrolled) as total_enrolled
-                    from ( SELECT
-                       school_id,
-                       school_name,
-                       SUM(enrolled) AS total_enrolled
-                   FROM (
-                       SELECT
-                           school_id,
-                           school_name,
-                           date1_count,
-                           date2_count,
-                           SUM(CASE WHEN student_count_change < 0 THEN 0 else student_count_change END) AS enrolled
-                       FROM (
-                           SELECT
-                               sam.school_id,
-                               sch.school_name ,
-                               COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END) AS date1_count,
-                               COUNT(CASE WHEN sam.date = endDate THEN sam.attendance_status END) AS date2_count,
-                               COUNT(CASE WHEN sam.date = endDate THEN sam.attendance_status END) - COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END) AS student_count_change
-                           FROM
-                               student_attendance.student_attendance_master sam 
-                           LEFT JOIN
-                               dimensions.district d ON sam.district_id = d.district_id 
-                           LEFT JOIN
-                               dimensions.block b ON sam.block_id = b.block_id 
-                           left join 
-                       dimensions.cluster c on sam.cluster_id = c.cluster_id 
-                       left join 
-                       dimensions.school sch on sam.school_id = sch.school_id 
-                           LEFT JOIN
-                               dimensions.class cc ON sam.class_id = cc.class_id 
-                           WHERE
-                               sam.date IN (startDate, endDate) AND   sam.cluster_id = {cluster_id}
-                           GROUP BY
-                                sam.school_id, sch.school_name
-                       ) AS subquery
-                       GROUP BY
-                           school_id,school_name, date1_count, date2_count
-                   ) AS cluster_query
-                   GROUP BY
-                       school_id,
-                       school_name) as tot_query
-                `,
+                    "bigNumber": `select SUM(enrolled) as total_enrolled
+                    from (SELECT
+                    school_id,
+                    school_name,
+                    SUM(date1_count) AS total_date1_count,
+                    SUM(date2_count) AS total_date2_count,
+                    SUM(enrolled) AS enrolled,
+                    SUM(deenrolled) AS total_deenrolled
+                FROM (                        
+SELECT
+    school_id,
+    school_name,
+    date1_count,
+    date2_count,
+    SUM(CASE WHEN student_count_change < 0 THEN 0 ELSE student_count_change END) AS enrolled,
+    SUM(CASE WHEN student_count_change < 0 THEN ABS(student_count_change) ELSE 0 END) AS deenrolled
+FROM (
+    SELECT
+        sam.school_id,
+        sam.school_name,
+        SUM(CASE WHEN sam.date = startDate THEN sam.count_attendance END) AS date1_count,
+        SUM(CASE WHEN sam.date = endDate THEN sam.count_attendance END) AS date2_count,
+        SUM(CASE WHEN sam.date = endDate THEN sam.count_attendance ELSE 0 END) - 
+        SUM(CASE WHEN sam.date = startDate THEN sam.count_attendance ELSE 0 END) AS student_count_change
+    FROM
+        student_attendance.stud_avg_school sam 
+join
+dimesions.class cc on sam.class = cc.class_id
+    WHERE
+        sam.date IN (startDate,endDate)  and cluster_id = {cluster_id} 
+    GROUP BY
+        sam.school_id, sam.school_name        
+) AS subquery
+GROUP BY
+    school_id, school_name, date1_count, date2_count ) AS block_query
+                GROUP BY
+                    school_id,
+                    school_name ) as tot_query ; `,
                    
                 },
                 "actions": {
                     "queries": {
-                        "bigNumber": `select SUM(total_enrolled) as total_enrolled
-                        from ( SELECT
-                           school_id,
-                           school_name,
-                           SUM(enrolled) AS total_enrolled
-                       FROM (
-                           SELECT
-                               school_id,
-                               school_name,
-                               date1_count,
-                               date2_count,
-                               SUM(CASE WHEN student_count_change < 0 THEN 0 else student_count_change END) AS enrolled
-                           FROM (
-                               SELECT
-                                   sam.school_id,
-                                   sch.school_name ,
-                                   COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END) AS date1_count,
-                                   COUNT(CASE WHEN sam.date = endDate THEN sam.attendance_status END) AS date2_count,
-                                   COUNT(CASE WHEN sam.date = endDate THEN sam.attendance_status END) - COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END) AS student_count_change
-                               FROM
-                                   student_attendance.student_attendance_master sam 
-                               LEFT JOIN
-                                   dimensions.district d ON sam.district_id = d.district_id 
-                               LEFT JOIN
-                                   dimensions.block b ON sam.block_id = b.block_id 
-                               left join 
-                           dimensions.cluster c on sam.cluster_id = c.cluster_id 
-                           left join 
-                           dimensions.school sch on sam.school_id = sch.school_id 
-                               LEFT JOIN
-                                   dimensions.class cc ON sam.class_id = cc.class_id 
-                               WHERE
-                                   sam.date IN (startDate, endDate) AND   sam.cluster_id = {cluster_id}
-                               GROUP BY
-                                    sam.school_id, sch.school_name
-                           ) AS subquery
-                           GROUP BY
-                               school_id,school_name, date1_count, date2_count
-                       ) AS cluster_query
-                       GROUP BY
-                           school_id,
-                           school_name) as tot_query
-    `,
+                        "bigNumber": `select SUM(enrolled) as total_enrolled
+                    from (SELECT
+                    school_id,
+                    school_name,
+                    SUM(date1_count) AS total_date1_count,
+                    SUM(date2_count) AS total_date2_count,
+                    SUM(enrolled) AS enrolled,
+                    SUM(deenrolled) AS total_deenrolled
+                FROM (                        
+SELECT
+    school_id,
+    school_name,
+    date1_count,
+    date2_count,
+    SUM(CASE WHEN student_count_change < 0 THEN 0 ELSE student_count_change END) AS enrolled,
+    SUM(CASE WHEN student_count_change < 0 THEN ABS(student_count_change) ELSE 0 END) AS deenrolled
+FROM (
+    SELECT
+        sam.school_id,
+        sam.school_name,
+        SUM(CASE WHEN sam.date = startDate THEN sam.count_attendance END) AS date1_count,
+        SUM(CASE WHEN sam.date = endDate THEN sam.count_attendance END) AS date2_count,
+        SUM(CASE WHEN sam.date = endDate THEN sam.count_attendance ELSE 0 END) - 
+        SUM(CASE WHEN sam.date = startDate THEN sam.count_attendance ELSE 0 END) AS student_count_change
+    FROM
+        student_attendance.stud_avg_school sam 
+join
+dimesions.class cc on sam.class = cc.class_id
+    WHERE
+        sam.date IN (startDate,endDate)  and cluster_id = {cluster_id} 
+    GROUP BY
+        sam.school_id, sam.school_name        
+) AS subquery
+GROUP BY
+    school_id, school_name, date1_count, date2_count ) AS block_query
+                GROUP BY
+                    school_id,
+                    school_name ) as tot_query ;`,
                         
                     },
                     "level": "school"
@@ -1251,87 +1146,85 @@ student_comparative_bignumber: {
                 "valueProp": "school_id",
                 "hierarchyLevel": "5",
                 "timeSeriesQueries": {
-                    "table": `SELECT
-                    coalesce
-                    (
-                    SUM
-                    (
-                    CASE
-                    WHEN
-                    student_count_change = 0
-                    OR
-                    student_count_change > 0
-                    THEN
-                    student_count_change
-                    ELSE
-                    0
-                    END
-                    ),0)
-                    AS
-                    enrolled
-                    FROM
-                        (select
-                            COUNT(CASE WHEN sam.date = endDate THEN sam.attendance_status END) - COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END) AS student_count_change
-                        FROM
-                            student_attendance.student_attendance_master sam 
-                        LEFT JOIN
-                            dimensions.district d ON sam.district_id = d.district_id 
-                         left join 
-                             dimensions.block b on sam.block_id = b.block_id
-                         left join 
-                              dimensions.cluster c on sam.cluster_id = c.cluster_id 
-                         left join 
-                             dimensions.school sch on sam.school_id = sch.school_id 
-                        LEFT JOIN
-                            dimensions.classs cc ON sam.class_id = cc.class_id 
-                        WHERE
-                            sam.date IN (startDate, endDate) and sam.school_id  = {school_id}
-                        GROUP BY
-                            sam.school_id) AS subquery
-                    
-                    `,
+                    "table": ` select SUM(enrolled) as total_enrolled
+                    from (SELECT
+                    school_id,
+                    school_name,
+                    SUM(date1_count) AS total_date1_count,
+                    SUM(date2_count) AS total_date2_count,
+                    SUM(enrolled) AS enrolled,
+                    SUM(deenrolled) AS total_deenrolled
+                FROM (                        
+SELECT
+    school_id,
+    school_name,
+    date1_count,
+    date2_count,
+    SUM(CASE WHEN student_count_change < 0 THEN 0 ELSE student_count_change END) AS enrolled,
+    SUM(CASE WHEN student_count_change < 0 THEN ABS(student_count_change) ELSE 0 END) AS deenrolled
+FROM (
+    SELECT
+        sam.school_id,
+        sam.school_name,
+        SUM(CASE WHEN sam.date = startDate THEN sam.count_attendance END) AS date1_count,
+        SUM(CASE WHEN sam.date = endDate THEN sam.count_attendance END) AS date2_count,
+        SUM(CASE WHEN sam.date = endDate THEN sam.count_attendance ELSE 0 END) - 
+        SUM(CASE WHEN sam.date = startDate THEN sam.count_attendance ELSE 0 END) AS student_count_change
+    FROM
+        student_attendance.stud_avg_school sam 
+join
+        dimensions.class cc on sam.class = cc.class_id
+       WHERE
+        sam.date IN ('2024-09-23', '2024-09-24')  and school_id = {school_id} 
+    GROUP BY
+        sam.school_id, sam.school_name        
+) AS subquery
+GROUP BY
+    school_id, school_name, date1_count, date2_count ) AS block_query
+                GROUP BY
+                    school_id,
+                    school_name ) as tot_query ;`,
                 },
                 "actions": {
                     "queries": {
-                        "table":`SELECT
-                        coalesce
-                        (
-                        SUM
-                        (
-                        CASE
-                        WHEN
-                        student_count_change = 0
-                        OR
-                        student_count_change > 0
-                        THEN
-                        student_count_change
-                        ELSE
-                        0
-                        END
-                        ),0)
-                        AS
-                        enrolled
-                        FROM
-                            (select
-                                COUNT(CASE WHEN sam.date = endDate THEN sam.attendance_status END) - COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END) AS student_count_change
-                            FROM
-                                student_attendance.student_attendance_master sam 
-                            LEFT JOIN
-                                dimensions.district d ON sam.district_id = d.district_id 
-                             left join 
-                                 dimensions.block b on sam.block_id = b.block_id
-                             left join 
-                                  dimensions.cluster c on sam.cluster_id = c.cluster_id 
-                             left join 
-                                 dimensions.school sch on sam.school_id = sch.school_id 
-                            LEFT JOIN
-                                dimensions.classs cc ON sam.class_id = cc.class_id 
-                            WHERE
-                                sam.date IN (startDate, endDate) and sam.school_id  = {school_id}
-                            GROUP BY
-                                sam.school_id) AS subquery
-                        
-                        `,
+                        "table":` select SUM(enrolled) as total_enrolled
+                    from (SELECT
+                    school_id,
+                    school_name,
+                    SUM(date1_count) AS total_date1_count,
+                    SUM(date2_count) AS total_date2_count,
+                    SUM(enrolled) AS enrolled,
+                    SUM(deenrolled) AS total_deenrolled
+                FROM (                        
+SELECT
+    school_id,
+    school_name,
+    date1_count,
+    date2_count,
+    SUM(CASE WHEN student_count_change < 0 THEN 0 ELSE student_count_change END) AS enrolled,
+    SUM(CASE WHEN student_count_change < 0 THEN ABS(student_count_change) ELSE 0 END) AS deenrolled
+FROM (
+    SELECT
+        sam.school_id,
+        sam.school_name,
+        SUM(CASE WHEN sam.date = startDate THEN sam.count_attendance END) AS date1_count,
+        SUM(CASE WHEN sam.date = endDate THEN sam.count_attendance END) AS date2_count,
+        SUM(CASE WHEN sam.date = endDate THEN sam.count_attendance ELSE 0 END) - 
+        SUM(CASE WHEN sam.date = startDate THEN sam.count_attendance ELSE 0 END) AS student_count_change
+    FROM
+        student_attendance.stud_avg_school sam 
+join
+        dimensions.class cc on sam.class = cc.class_id
+       WHERE
+        sam.date IN ('2024-09-23', '2024-09-24')  and school_id = {school_id} 
+    GROUP BY
+        sam.school_id, sam.school_name        
+) AS subquery
+GROUP BY
+    school_id, school_name, date1_count, date2_count ) AS block_query
+                GROUP BY
+                    school_id,
+                    school_name ) as tot_query ;`,
                     },
                     "level": "school"
                 }
@@ -1356,96 +1249,84 @@ student_comparative_bignumber: {
                 "timeSeriesQueries": {
                     "bigNumber": `select SUM(total_deenrolled) as total_deenrolled
                     from (SELECT
-                        district_id,
-                        district_name,
-                        SUM(deenrolled) AS total_deenrolled
-                    FROM (
-                        SELECT
-                            district_id,
-                            district_name,
-                            date1_count,
-                            date2_count,
-                            SUM(CASE WHEN student_count_change < 0 THEN ABS(student_count_change) ELSE 0 END) AS deenrolled
-                        FROM (
-                            SELECT
-                                sam.district_id,
-                                d.district_name,
-                                COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END) AS date1_count,
-                                COUNT(CASE WHEN sam.date = endDate THEN sam.attendance_status END) AS date2_count,
-                                COUNT(CASE WHEN sam.date = endDate THEN sam.attendance_status END) - COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END) AS student_count_change
-                            FROM
-                                student_attendance.student_attendance_master sam 
-                            LEFT JOIN
-                                dimensions.district d ON sam.district_id = d.district_id 
-                           LEFT join
-                       dimensions.block b on sam.block_id = b.block_id 
-                                left join 
-                        dimensions.cluster c on sam.cluster_id = c.cluster_id 
-                        left join 
-                        dimensions.school sch on sam.school_id = sch.school_id
-                                   LEFT JOIN
-                                dimensions.class cc ON sam.class_id = cc.class_id 
-                            WHERE
-                                sam.date IN (startDate, endDate)   
-                            GROUP BY
-                                 sam.district_id, d.district_name, sam.block_id, sam.cluster_id, sam.school_id
-                        ) AS subquery
-                        GROUP BY
-                            district_id,district_name ,date1_count, date2_count
-                    ) AS state_query
-                    GROUP BY
-                        district_id,
-                        district_name) as tot_query
-                        
-                     `
+                    district_id,
+                    district_name,
+                    SUM(date1_count) AS total_date1_count,
+                    SUM(date2_count) AS total_date2_count,
+                    SUM(enrolled) AS enrolled,
+                    SUM(deenrolled) AS total_deenrolled
+                FROM (                        
+SELECT
+    district_id,
+    district_name,
+    date1_count,
+    date2_count,
+    SUM(CASE WHEN student_count_change < 0 THEN 0 ELSE student_count_change END) AS enrolled,
+    SUM(CASE WHEN student_count_change < 0 THEN ABS(student_count_change) ELSE 0 END) AS deenrolled
+FROM (
+    SELECT
+        sam.district_id,
+        sam.district_name,
+        SUM(CASE WHEN sam.date = startDate THEN sam.count_attendance END) AS date1_count,
+        SUM(CASE WHEN sam.date = endDate THEN sam.count_attendance END) AS date2_count,
+        SUM(CASE WHEN sam.date = endDate THEN sam.count_attendance ELSE 0 END) - 
+        SUM(CASE WHEN sam.date = startDate THEN sam.count_attendance ELSE 0 END) AS student_count_change
+    FROM
+        student_attendance.stud_avg_school sam 
+join
+dimensions.class cc on sam.class = cc.class_id
+    WHERE
+        sam.date IN (startDate, endDate)   
+    GROUP BY
+        sam.district_id, sam.district_name        
+) AS subquery
+GROUP BY
+    district_id, district_name, date1_count, date2_count ) AS state_query
+                GROUP BY
+                    district_id,
+                    district_name) as tot_query;`
 
                 },
                 "actions": {
                     "queries": {
                         "bigNumber": `select SUM(total_deenrolled) as total_deenrolled
-                        from (SELECT
-                            district_id,
-                            district_name,
-                            SUM(deenrolled) AS total_deenrolled
-                        FROM (
-                            SELECT
-                                district_id,
-                                district_name,
-                                date1_count,
-                                date2_count,
-                                SUM(CASE WHEN student_count_change < 0 THEN ABS(student_count_change) ELSE 0 END) AS deenrolled
-                            FROM (
-                                SELECT
-                                    sam.district_id,
-                                    d.district_name,
-                                    COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END) AS date1_count,
-                                    COUNT(CASE WHEN sam.date = endDate THEN sam.attendance_status END) AS date2_count,
-                                    COUNT(CASE WHEN sam.date = endDate THEN sam.attendance_status END) - COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END) AS student_count_change
-                                FROM
-                                    student_attendance.student_attendance_master sam 
-                                LEFT JOIN
-                                    dimensions.district d ON sam.district_id = d.district_id 
-                               LEFT join
-                           dimensions.block b on sam.block_id = b.block_id 
-                                    left join 
-                            dimensions.cluster c on sam.cluster_id = c.cluster_id 
-                            left join 
-                            dimensions.school sch on sam.school_id = sch.school_id
-                                       LEFT JOIN
-                                    dimensions.class cc ON sam.class_id = cc.class_id 
-                                WHERE
-                                    sam.date IN (startDate, endDate)   
-                                GROUP BY
-                                     sam.district_id, d.district_name, sam.block_id, sam.cluster_id, sam.school_id
-                            ) AS subquery
-                            GROUP BY
-                                district_id,district_name ,date1_count, date2_count
-                        ) AS state_query
-                        GROUP BY
-                            district_id,
-                            district_name) as tot_query
-                            
-                         `
+                    from (SELECT
+                    district_id,
+                    district_name,
+                    SUM(date1_count) AS total_date1_count,
+                    SUM(date2_count) AS total_date2_count,
+                    SUM(enrolled) AS enrolled,
+                    SUM(deenrolled) AS total_deenrolled
+                FROM (                        
+SELECT
+    district_id,
+    district_name,
+    date1_count,
+    date2_count,
+    SUM(CASE WHEN student_count_change < 0 THEN 0 ELSE student_count_change END) AS enrolled,
+    SUM(CASE WHEN student_count_change < 0 THEN ABS(student_count_change) ELSE 0 END) AS deenrolled
+FROM (
+    SELECT
+        sam.district_id,
+        sam.district_name,
+        SUM(CASE WHEN sam.date = startDate THEN sam.count_attendance END) AS date1_count,
+        SUM(CASE WHEN sam.date = endDate THEN sam.count_attendance END) AS date2_count,
+        SUM(CASE WHEN sam.date = endDate THEN sam.count_attendance ELSE 0 END) - 
+        SUM(CASE WHEN sam.date = startDate THEN sam.count_attendance ELSE 0 END) AS student_count_change
+    FROM
+        student_attendance.stud_avg_school sam 
+join
+dimensions.class cc on sam.class = cc.class_id
+    WHERE
+        sam.date IN (startDate, endDate)   
+    GROUP BY
+        sam.district_id, sam.district_name        
+) AS subquery
+GROUP BY
+    district_id, district_name, date1_count, date2_count ) AS state_query
+                GROUP BY
+                    district_id,
+                    district_name) as tot_query;`
                     },
                     "level": "district"
                 }
@@ -1458,93 +1339,83 @@ student_comparative_bignumber: {
                 "timeSeriesQueries": {
                     "bigNumber": `select SUM(total_deenrolled) as total_deenrolled
                     from (SELECT
-                       block_id,
-                       block_name,
-                       SUM(deenrolled) AS total_deenrolled
-                   FROM (
-                       SELECT
-                           block_id,
-                           block_name,
-                           date1_count,
-                           date2_count,
-                           SUM(CASE WHEN student_count_change < 0 THEN ABS(student_count_change) ELSE 0 END) AS deenrolled
-                       FROM (
-                           SELECT
-                               sam.block_id,
-                               b.block_name,
-                               COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END) AS date1_count,
-                               COUNT(CASE WHEN sam.date = endDate THEN sam.attendance_status END) AS date2_count,
-                               COUNT(CASE WHEN sam.date = endDate THEN sam.attendance_status END) - COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END) AS student_count_change
-                           FROM
-                               student_attendance.student_attendance_master sam 
-                           LEFT JOIN
-                               dimensions.district d ON sam.district_id = d.district_id 
-                           LEFT JOIN
-                               dimensions.block b ON sam.block_id = b.block_id 
-                               left join 
-                           dimensions.cluster c on sam.cluster_id = c.cluster_id 
-                       left join 
-                           dimensions.school sch on sam.school_id = sch.school_id
-                           LEFT JOIN
-                               dimensions.class cc ON sam.class_id = cc.class_id 
-                           WHERE
-                               sam.date IN (startDate, endDate)   AND sam.district_id = {district_id}
-                           GROUP BY
-                                sam.block_id, b.block_name, sam.cluster_id, sam.school_id
-                       ) AS subquery
-                       GROUP BY
-                           block_id,block_name ,date1_count, date2_count
-                   ) AS district_query
-                   GROUP BY
-                       block_id,
-                       block_name) as tot_query                   
-                        `
+                    block_id,
+                    block_name,
+                    SUM(date1_count) AS total_date1_count,
+                    SUM(date2_count) AS total_date2_count,
+                    SUM(enrolled) AS enrolled,
+                    SUM(deenrolled) AS total_deenrolled
+                FROM (                        
+SELECT
+    block_id,
+    block_name,
+    date1_count,
+    date2_count,
+    SUM(CASE WHEN student_count_change < 0 THEN 0 ELSE student_count_change END) AS enrolled,
+    SUM(CASE WHEN student_count_change < 0 THEN ABS(student_count_change) ELSE 0 END) AS deenrolled
+FROM (
+    SELECT
+        sam.block_id,
+        sam.block_name,
+        SUM(CASE WHEN sam.date = startDate THEN sam.count_attendance END) AS date1_count,
+        SUM(CASE WHEN sam.date = endDate THEN sam.count_attendance END) AS date2_count,
+        SUM(CASE WHEN sam.date = endDate THEN sam.count_attendance ELSE 0 END) - 
+        SUM(CASE WHEN sam.date = startDate THEN sam.count_attendance ELSE 0 END) AS student_count_change
+    FROM
+        student_attendance.stud_avg_school sam 
+join
+dimensions.class cc on sam.class = cc.class_id
+    WHERE
+        sam.date IN (startDate,endDate)  and district_id = {district_id} 
+    GROUP BY
+        sam.block_id, sam.block_name        
+) AS subquery
+GROUP BY
+    block_id, block_name, date1_count, date2_count ) AS district_query
+                GROUP BY
+                    block_id,
+                    block_name ) as tot_query;`
                 },
                 "actions": {
                     "queries": {
                         "bigNumber": `select SUM(total_deenrolled) as total_deenrolled
-                        from (SELECT
-                           block_id,
-                           block_name,
-                           SUM(deenrolled) AS total_deenrolled
-                       FROM (
-                           SELECT
-                               block_id,
-                               block_name,
-                               date1_count,
-                               date2_count,
-                               SUM(CASE WHEN student_count_change < 0 THEN ABS(student_count_change) ELSE 0 END) AS deenrolled
-                           FROM (
-                               SELECT
-                                   sam.block_id,
-                                   b.block_name,
-                                   COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END) AS date1_count,
-                                   COUNT(CASE WHEN sam.date = endDate THEN sam.attendance_status END) AS date2_count,
-                                   COUNT(CASE WHEN sam.date = endDate THEN sam.attendance_status END) - COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END) AS student_count_change
-                               FROM
-                                   student_attendance.student_attendance_master sam 
-                               LEFT JOIN
-                                   dimensions.district d ON sam.district_id = d.district_id 
-                               LEFT JOIN
-                                   dimensions.block b ON sam.block_id = b.block_id 
-                                   left join 
-                               dimensions.cluster c on sam.cluster_id = c.cluster_id 
-                           left join 
-                               dimensions.school sch on sam.school_id = sch.school_id
-                               LEFT JOIN
-                                   dimensions.class cc ON sam.class_id = cc.class_id 
-                               WHERE
-                                   sam.date IN (startDate, endDate)   AND sam.district_id = {district_id}
-                               GROUP BY
-                                    sam.block_id, b.block_name, sam.cluster_id, sam.school_id
-                           ) AS subquery
-                           GROUP BY
-                               block_id,block_name ,date1_count, date2_count
-                       ) AS district_query
-                       GROUP BY
-                           block_id,
-                           block_name) as tot_query
-                       `
+                    from (SELECT
+                    block_id,
+                    block_name,
+                    SUM(date1_count) AS total_date1_count,
+                    SUM(date2_count) AS total_date2_count,
+                    SUM(enrolled) AS enrolled,
+                    SUM(deenrolled) AS total_deenrolled
+                FROM (                        
+SELECT
+    block_id,
+    block_name,
+    date1_count,
+    date2_count,
+    SUM(CASE WHEN student_count_change < 0 THEN 0 ELSE student_count_change END) AS enrolled,
+    SUM(CASE WHEN student_count_change < 0 THEN ABS(student_count_change) ELSE 0 END) AS deenrolled
+FROM (
+    SELECT
+        sam.block_id,
+        sam.block_name,
+        SUM(CASE WHEN sam.date = startDate THEN sam.count_attendance END) AS date1_count,
+        SUM(CASE WHEN sam.date = endDate THEN sam.count_attendance END) AS date2_count,
+        SUM(CASE WHEN sam.date = endDate THEN sam.count_attendance ELSE 0 END) - 
+        SUM(CASE WHEN sam.date = startDate THEN sam.count_attendance ELSE 0 END) AS student_count_change
+    FROM
+        student_attendance.stud_avg_school sam 
+join
+dimensions.class cc on sam.class = cc.class_id
+    WHERE
+        sam.date IN (startDate,endDate)  and district_id = {district_id} 
+    GROUP BY
+        sam.block_id, sam.block_name        
+) AS subquery
+GROUP BY
+    block_id, block_name, date1_count, date2_count ) AS district_query
+                GROUP BY
+                    block_id,
+                    block_name ) as tot_query;`
                     },
                     "level": "block"
                 }
@@ -1557,102 +1428,86 @@ student_comparative_bignumber: {
                 "hierarchyLevel": "3",
                 "timeSeriesQueries": {
                     "bigNumber": `select SUM(total_deenrolled) as total_deenrolled
+                    from (select SUM(total_deenrolled) as total_deenrolled
                     from (SELECT
-                       cluster_id,
-                       cluster_name,
-                       SUM(date1_count) AS total_date1_count,
-                       SUM(date2_count) AS total_date2_count,
-                       SUM(enrolled) AS total_enrolled,
-                       SUM(deenrolled) AS total_deenrolled
-                   FROM (
-                       SELECT
-                           cluster_id,
-                           cluster_name,
-                           date1_count,
-                           date2_count,
-                           SUM(CASE WHEN student_count_change < 0 THEN 0 else student_count_change END) AS enrolled,
-                           SUM(CASE WHEN student_count_change < 0 THEN ABS(student_count_change) ELSE 0 END) AS deenrolled
-                       FROM (
-                           SELECT
-                               sam.cluster_id,
-                               c.cluster_name,
-                               COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END) AS date1_count,
-                               COUNT(CASE WHEN sam.date = endDate THEN sam.attendance_status END) AS date2_count,
-                               COUNT(CASE WHEN sam.date = endDate THEN sam.attendance_status END) - COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END) AS student_count_change
-                           FROM
-                               student_attendance.student_attendance_master sam 
-                           LEFT JOIN
-                               dimensions.district d ON sam.district_id = d.district_id 
-                           LEFT JOIN
-                               dimensions.block b ON sam.block_id = b.block_id 
-                              left join 
-                       dimensions.cluster c on sam.cluster_id = c.cluster_id 
-                       left join 
-                       dimensions.school sch on sam.school_id = sch.school_id 
-                           LEFT JOIN
-                               dimensions.class cc ON sam.class_id = cc.class_id 
-                           WHERE
-                               sam.date IN (startDate, endDate)    AND sam.block_id = {block_id}
-                           GROUP BY
-                                sam.cluster_id, c.cluster_name, sam.school_id
-                       ) AS subquery
-                       GROUP BY
-                           cluster_id,cluster_name ,date1_count, date2_count
-                   ) AS block_query
-                   GROUP BY
-                       cluster_id,
-                       cluster_name) as tot_query
-                    `,
+                    cluster_id,
+                    cluster_name,
+                    SUM(date1_count) AS total_date1_count,
+                    SUM(date2_count) AS total_date2_count,
+                    SUM(enrolled) AS enrolled,
+                    SUM(deenrolled) AS total_deenrolled
+                FROM (                        
+SELECT
+    cluster_id,
+    cluster_name,
+    date1_count,
+    date2_count,
+    SUM(CASE WHEN student_count_change < 0 THEN 0 ELSE student_count_change END) AS enrolled,
+    SUM(CASE WHEN student_count_change < 0 THEN ABS(student_count_change) ELSE 0 END) AS deenrolled
+FROM (
+    SELECT
+        sam.cluster_id,
+        sam.cluster_name,
+        SUM(CASE WHEN sam.date = startDateTHEN sam.count_attendance END) AS date1_count,
+        SUM(CASE WHEN sam.date = endDate THEN sam.count_attendance END) AS date2_count,
+        SUM(CASE WHEN sam.date = endDate THEN sam.count_attendance ELSE 0 END) - 
+        SUM(CASE WHEN sam.date =startDate THEN sam.count_attendance ELSE 0 END) AS student_count_change
+    FROM
+        student_attendance.stud_avg_school sam 
+join
+dimensions.class cc on sam.class = cc.class_id
+    WHERE
+        sam.date IN startDate, endDate)  and block_id = {block_id}
+    GROUP BY
+        sam.cluster_id, sam.cluster_name        
+) AS subquery
+GROUP BY
+    cluster_id, cluster_name, date1_count, date2_count ) AS block_query
+                GROUP BY
+                    cluster_id,
+                    cluster_name ) as tot_query;`,
                     
                 },
                 "actions": {
                     "queries": {
                         "bigNumber": `select SUM(total_deenrolled) as total_deenrolled
-                        from (SELECT
-                           cluster_id,
-                           cluster_name,
-                           SUM(date1_count) AS total_date1_count,
-                           SUM(date2_count) AS total_date2_count,
-                           SUM(enrolled) AS total_enrolled,
-                           SUM(deenrolled) AS total_deenrolled
-                       FROM (
-                           SELECT
-                               cluster_id,
-                               cluster_name,
-                               date1_count,
-                               date2_count,
-                               SUM(CASE WHEN student_count_change < 0 THEN 0 else student_count_change END) AS enrolled,
-                               SUM(CASE WHEN student_count_change < 0 THEN ABS(student_count_change) ELSE 0 END) AS deenrolled
-                           FROM (
-                               SELECT
-                                   sam.cluster_id,
-                                   c.cluster_name,
-                                   COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END) AS date1_count,
-                                   COUNT(CASE WHEN sam.date = endDate THEN sam.attendance_status END) AS date2_count,
-                                   COUNT(CASE WHEN sam.date = endDate THEN sam.attendance_status END) - COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END) AS student_count_change
-                               FROM
-                                   student_attendance.student_attendance_master sam 
-                               LEFT JOIN
-                                   dimensions.district d ON sam.district_id = d.district_id 
-                               LEFT JOIN
-                                   dimensions.block b ON sam.block_id = b.block_id 
-                                  left join 
-                           dimensions.cluster c on sam.cluster_id = c.cluster_id 
-                           left join 
-                           dimensions.school sch on sam.school_id = sch.school_id 
-                               LEFT JOIN
-                                   dimensions.class cc ON sam.class_id = cc.class_id 
-                               WHERE
-                                   sam.date IN (startDate, endDate)    AND sam.block_id = {block_id}
-                               GROUP BY
-                                    sam.cluster_id, c.cluster_name, sam.school_id
-                           ) AS subquery
-                           GROUP BY
-                               cluster_id,cluster_name ,date1_count, date2_count
-                       ) AS block_query
-                       GROUP BY
-                           cluster_id,
-                           cluster_name) as tot_query                            `,
+                    from (SELECT
+                    cluster_id,
+                    cluster_name,
+                    SUM(date1_count) AS total_date1_count,
+                    SUM(date2_count) AS total_date2_count,
+                    SUM(enrolled) AS enrolled,
+                    SUM(deenrolled) AS total_deenrolled
+                FROM (                        
+SELECT
+    cluster_id,
+    cluster_name,
+    date1_count,
+    date2_count,
+    SUM(CASE WHEN student_count_change < 0 THEN 0 ELSE student_count_change END) AS enrolled,
+    SUM(CASE WHEN student_count_change < 0 THEN ABS(student_count_change) ELSE 0 END) AS deenrolled
+FROM (
+    SELECT
+        sam.cluster_id,
+        sam.cluster_name,
+        SUM(CASE WHEN sam.date = startDateTHEN sam.count_attendance END) AS date1_count,
+        SUM(CASE WHEN sam.date = endDate THEN sam.count_attendance END) AS date2_count,
+        SUM(CASE WHEN sam.date = endDate THEN sam.count_attendance ELSE 0 END) - 
+        SUM(CASE WHEN sam.date =startDate THEN sam.count_attendance ELSE 0 END) AS student_count_change
+    FROM
+        student_attendance.stud_avg_school sam 
+join
+dimensions.class cc on sam.class = cc.class_id
+    WHERE
+        sam.date IN startDate, endDate)  and block_id = {block_id}
+    GROUP BY
+        sam.cluster_id, sam.cluster_name        
+) AS subquery
+GROUP BY
+    cluster_id, cluster_name, date1_count, date2_count ) AS block_query
+                GROUP BY
+                    cluster_id,
+                    cluster_name ) as tot_query;`,
                        
                     },
                     "level": "cluster"
@@ -1665,94 +1520,85 @@ student_comparative_bignumber: {
                 "hierarchyLevel": "4",
                 "timeSeriesQueries": {
                     "bigNumber": `select SUM(total_deenrolled) as total_deenrolled
-                    from ( SELECT
-                       school_id,
-                       school_name,
-                       SUM(deenrolled) AS total_deenrolled
-                   FROM (
-                       SELECT
-                           school_id,
-                           school_name,
-                           date1_count,
-                           date2_count,
-                           SUM(CASE WHEN student_count_change < 0 THEN ABS(student_count_change) ELSE 0 END) AS deenrolled
-                       FROM (
-                           SELECT
-                               sam.school_id,
-                               sch.school_name ,
-                               COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END) AS date1_count,
-                               COUNT(CASE WHEN sam.date = endDate THEN sam.attendance_status END) AS date2_count,
-                               COUNT(CASE WHEN sam.date = endDate THEN sam.attendance_status END) - COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END) AS student_count_change
-                           FROM
-                               student_attendance.student_attendance_master sam 
-                           LEFT JOIN
-                               dimensions.district d ON sam.district_id = d.district_id 
-                           LEFT JOIN
-                               dimensions.block b ON sam.block_id = b.block_id 
-                           left join 
-                       dimensions.cluster c on sam.cluster_id = c.cluster_id 
-                       left join 
-                       dimensions.school sch on sam.school_id = sch.school_id 
-                           LEFT JOIN
-                               dimensions.class cc ON sam.class_id = cc.class_id 
-                           WHERE
-                               sam.date IN (startDate, endDate)   AND sam.cluster_id = {cluster_id}
-                           GROUP BY
-                                sam.school_id, sch.school_name
-                       ) AS subquery
-                       GROUP BY
-                           school_id,school_name, date1_count, date2_count
-                   ) AS cluster_query
-                   GROUP BY
-                       school_id,
-                       school_name) as tot_query                        `,
+                    from (SELECT
+                    school_id,
+                    school_name,
+                    SUM(date1_count) AS total_date1_count,
+                    SUM(date2_count) AS total_date2_count,
+                    SUM(enrolled) AS enrolled,
+                    SUM(deenrolled) AS total_deenrolled
+                FROM (                        
+SELECT
+    school_id,
+    school_name,
+    date1_count,
+    date2_count,
+    SUM(CASE WHEN student_count_change < 0 THEN 0 ELSE student_count_change END) AS enrolled,
+    SUM(CASE WHEN student_count_change < 0 THEN ABS(student_count_change) ELSE 0 END) AS deenrolled
+FROM (
+    SELECT
+        sam.school_id,
+        sam.school_name,
+        SUM(CASE WHEN sam.date =startDate THEN sam.count_attendance END) AS date1_count,
+        SUM(CASE WHEN sam.date = endDate THEN sam.count_attendance END) AS date2_count,
+        SUM(CASE WHEN sam.date =endDate THEN sam.count_attendance ELSE 0 END) - 
+        SUM(CASE WHEN sam.date =startDate THEN sam.count_attendance ELSE 0 END) AS student_count_change
+    FROM
+        student_attendance.stud_avg_school sam 
+join
+dimensions.class cc on sam.class = cc.class_id
+    WHERE
+        sam.date IN (startDate,endDate)  and cluster_id ={cluster_id}
+    GROUP BY
+        sam.school_id, sam.school_name        
+) AS subquery
+GROUP BY
+    school_id, school_name, date1_count, date2_count ) AS block_query
+                GROUP BY
+                    school_id,
+                    school_name ) as tot_query;`,
                    
                 },
                 "actions": {
                     "queries": {
                         "bigNumber": `select SUM(total_deenrolled) as total_deenrolled
-                        from ( SELECT
-                           school_id,
-                           school_name,
-                           SUM(deenrolled) AS total_deenrolled
-                       FROM (
-                           SELECT
-                               school_id,
-                               school_name,
-                               date1_count,
-                               date2_count,
-                               SUM(CASE WHEN student_count_change < 0 THEN ABS(student_count_change) ELSE 0 END) AS deenrolled
-                           FROM (
-                               SELECT
-                                   sam.school_id,
-                                   sch.school_name ,
-                                   COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END) AS date1_count,
-                                   COUNT(CASE WHEN sam.date = endDate THEN sam.attendance_status END) AS date2_count,
-                                   COUNT(CASE WHEN sam.date = endDate THEN sam.attendance_status END) - COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END) AS student_count_change
-                               FROM
-                                   student_attendance.student_attendance_master sam 
-                               LEFT JOIN
-                                   dimensions.district d ON sam.district_id = d.district_id 
-                               LEFT JOIN
-                                   dimensions.block b ON sam.block_id = b.block_id 
-                               left join 
-                           dimensions.cluster c on sam.cluster_id = c.cluster_id 
-                           left join 
-                           dimensions.school sch on sam.school_id = sch.school_id 
-                               LEFT JOIN
-                                   dimensions.class cc ON sam.class_id = cc.class_id 
-                               WHERE
-                                   sam.date IN (startDate, endDate)   AND sam.cluster_id = {cluster_id}
-                               GROUP BY
-                                    sam.school_id, sch.school_name
-                           ) AS subquery
-                           GROUP BY
-                               school_id,school_name, date1_count, date2_count
-                       ) AS cluster_query
-                       GROUP BY
-                           school_id,
-                           school_name) as tot_query
-                    `,
+                    from (SELECT
+                    school_id,
+                    school_name,
+                    SUM(date1_count) AS total_date1_count,
+                    SUM(date2_count) AS total_date2_count,
+                    SUM(enrolled) AS enrolled,
+                    SUM(deenrolled) AS total_deenrolled
+                FROM (                        
+SELECT
+    school_id,
+    school_name,
+    date1_count,
+    date2_count,
+    SUM(CASE WHEN student_count_change < 0 THEN 0 ELSE student_count_change END) AS enrolled,
+    SUM(CASE WHEN student_count_change < 0 THEN ABS(student_count_change) ELSE 0 END) AS deenrolled
+FROM (
+    SELECT
+        sam.school_id,
+        sam.school_name,
+        SUM(CASE WHEN sam.date =startDate THEN sam.count_attendance END) AS date1_count,
+        SUM(CASE WHEN sam.date = endDate THEN sam.count_attendance END) AS date2_count,
+        SUM(CASE WHEN sam.date =endDate THEN sam.count_attendance ELSE 0 END) - 
+        SUM(CASE WHEN sam.date =startDate THEN sam.count_attendance ELSE 0 END) AS student_count_change
+    FROM
+        student_attendance.stud_avg_school sam 
+join
+dimensions.class cc on sam.class = cc.class_id
+    WHERE
+        sam.date IN (startDate,endDate)  and cluster_id ={cluster_id}
+    GROUP BY
+        sam.school_id, sam.school_name        
+) AS subquery
+GROUP BY
+    school_id, school_name, date1_count, date2_count ) AS block_query
+                GROUP BY
+                    school_id,
+                    school_name ) as tot_query `,
                         
                     },
                     "level": "school"
@@ -1764,91 +1610,85 @@ student_comparative_bignumber: {
                 "valueProp": "school_id",
                 "hierarchyLevel": "5",
                 "timeSeriesQueries": {
-                    "table": `SELECT
-                    coalesce
-                    (
-                    ABS
-                    (
-                    SUM
-                    (
-                    CASE
-                    WHEN
-                    student_count_change = 0
-                    OR
-                    student_count_change < 0
-                    THEN
-                    student_count_change
-                    ELSE
-                    0
-                    END
-                    )),0)
-                    AS
-                    de_enrolled
-                    FROM
-                        (select
-                            COUNT(CASE WHEN sam.date = endDate THEN sam.attendance_status END) - COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END) AS student_count_change
-                        FROM
-                            student_attendance.student_attendance_master sam 
-                        LEFT JOIN
-                            dimensions.district d ON sam.district_id = d.district_id 
-                         left join 
-                             dimensions.block b on sam.block_id = b.block_id
-                         left join 
-                              dimensions.cluster c on sam.cluster_id = c.cluster_id 
-                         left join 
-                             dimensions.school sch on sam.school_id = sch.school_id 
-                        LEFT JOIN
-                            dimensions.class cc ON sam.class_id = cc.class_id 
-                        WHERE
-                            sam.date IN (startDate, endDate) and sam.school_id  = {school_id}
-                        GROUP BY
-                            sam.school_id) AS subquery
-                    
-                    `,
+                    "table": `select SUM(total_deenrolled) as total_deenrolled
+                    from (SELECT
+                    school_id,
+                    school_name,
+                    SUM(date1_count) AS total_date1_count,
+                    SUM(date2_count) AS total_date2_count,
+                    SUM(enrolled) AS enrolled,
+                    SUM(deenrolled) AS total_deenrolled
+                FROM (                        
+SELECT
+    school_id,
+    school_name,
+    date1_count,
+    date2_count,
+    SUM(CASE WHEN student_count_change < 0 THEN 0 ELSE student_count_change END) AS enrolled,
+    SUM(CASE WHEN student_count_change < 0 THEN ABS(student_count_change) ELSE 0 END) AS deenrolled
+FROM (
+    SELECT
+        sam.school_id,
+        sam.school_name,
+        SUM(CASE WHEN sam.date = startDate THEN sam.count_attendance END) AS date1_count,
+        SUM(CASE WHEN sam.date =endDate THEN sam.count_attendance END) AS date2_count,
+        SUM(CASE WHEN sam.date = endDate THEN sam.count_attendance ELSE 0 END) - 
+        SUM(CASE WHEN sam.date = startDate THEN sam.count_attendance ELSE 0 END) AS student_count_change
+    FROM
+        student_attendance.stud_avg_school sam 
+join
+dimensions.class cc on sam.class = cc.class_id
+    WHERE
+        sam.date IN (startDate, endDate)  and school_id = {school_id}
+    GROUP BY
+        sam.school_id, sam.school_name        
+) AS subquery
+GROUP BY
+    school_id, school_name, date1_count, date2_count ) AS block_query
+                GROUP BY
+                    school_id,
+                    school_name ) as tot_query ;`,
                 },
                 "actions": {
                     "queries": {
-                        "table":`SELECT
-                        coalesce
-                        (
-                        ABS
-                        (
-                        SUM
-                        (
-                        CASE
-                        WHEN
-                        student_count_change = 0
-                        OR
-                        student_count_change < 0
-                        THEN
-                        student_count_change
-                        ELSE
-                        0
-                        END
-                        )),0)
-                        AS
-                        de_enrolled
-                        FROM
-                            (select
-                                COUNT(CASE WHEN sam.date = endDate THEN sam.attendance_status END) - COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END) AS student_count_change
-                            FROM
-                                student_attendance.student_attendance_master sam 
-                            LEFT JOIN
-                                dimensions.district d ON sam.district_id = d.district_id 
-                             left join 
-                                 dimensions.block b on sam.block_id = b.block_id
-                             left join 
-                                  dimensions.cluster c on sam.cluster_id = c.cluster_id 
-                             left join 
-                                 dimensions.school sch on sam.school_id = sch.school_id 
-                            LEFT JOIN
-                                dimensions.class cc ON sam.class_id = cc.class_id 
-                            WHERE
-                                sam.date IN (startDate, endDate) and sam.school_id  = {school_id}
-                            GROUP BY
-                                sam.school_id) AS subquery
-                        
-                        `,
+                        "table":`select SUM(total_deenrolled) as total_deenrolled
+                    from (SELECT
+                    school_id,
+                    school_name,
+                    SUM(date1_count) AS total_date1_count,
+                    SUM(date2_count) AS total_date2_count,
+                    SUM(enrolled) AS enrolled,
+                    SUM(deenrolled) AS total_deenrolled
+                FROM (                        
+SELECT
+    school_id,
+    school_name,
+    date1_count,
+    date2_count,
+    SUM(CASE WHEN student_count_change < 0 THEN 0 ELSE student_count_change END) AS enrolled,
+    SUM(CASE WHEN student_count_change < 0 THEN ABS(student_count_change) ELSE 0 END) AS deenrolled
+FROM (
+    SELECT
+        sam.school_id,
+        sam.school_name,
+        SUM(CASE WHEN sam.date = startDate THEN sam.count_attendance END) AS date1_count,
+        SUM(CASE WHEN sam.date =endDate THEN sam.count_attendance END) AS date2_count,
+        SUM(CASE WHEN sam.date = endDate THEN sam.count_attendance ELSE 0 END) - 
+        SUM(CASE WHEN sam.date = startDate THEN sam.count_attendance ELSE 0 END) AS student_count_change
+    FROM
+        student_attendance.stud_avg_school sam 
+join
+dimensions.class cc on sam.class = cc.class_id
+    WHERE
+        sam.date IN (startDate, endDate)  and school_id = {school_id}
+    GROUP BY
+        sam.school_id, sam.school_name        
+) AS subquery
+GROUP BY
+    school_id, school_name, date1_count, date2_count ) AS block_query
+                GROUP BY
+                    school_id,
+                    school_name ) as tot_query `,
                     },
                     "level": "school"
                 }
@@ -1874,41 +1714,45 @@ student_comparative_bignumber: {
                 "hierarchyLevel": "1",
                 "timeSeriesQueries": {
                     "bigNumber": `SELECT ROUND(AVG(student_count_change_perc),4) as sum_perc
-                    from ( SELECT
-                        sam.district_id,
-                        d.district_name,
-                       ROUND((COUNT(CASE WHEN sam.date = endDate THEN sam.attendance_status END) - COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END))::numeric / (COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END))* 100, 4) AS student_count_change_perc
-                    FROM
-                       student_attendance.student_attendance_master sam 
-                    LEFT join
-                    dimensions.district d on sam.district_id = d.district_id 
-                    LEFT JOIN
-                        dimensions.class cc ON sam.class_id = cc.class_id 
-                    where
-                      sam.date in ( startDate,endDate)  
-                    GROUP BY
-                        sam.district_id, d.district_name) as perc_sum
-                    `
+                    from (select 
+district_id,
+district_name as level,
+coalesce(ROUND(
+            (
+                SUM(CASE WHEN sam.date = endDate THEN count_attendance END) - 
+                SUM(CASE WHEN sam.date = startDate THEN count_attendance END)
+            )::numeric / 
+            SUM(CASE WHEN sam.date = startDate THEN count_attendance END) * 100, 
+        4),0) as student_count_change_perc from
+ student_attendance.stud_avg_dis sam
+join
+dimensions.class cc on sam.class = cc.class_id
+ where
+                  sam.date in ( startDate,endDate)  
+                GROUP BY
+                    sam.district_id, sam.district_name) as perc_sum;`
 
                 },
                 "actions": {
                     "queries": {
                         "bigNumber": `SELECT ROUND(AVG(student_count_change_perc),4) as sum_perc
-                        from ( SELECT
-                            sam.district_id,
-                            d.district_name,
-                           ROUND((COUNT(CASE WHEN sam.date = endDate THEN sam.attendance_status END) - COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END))::numeric / (COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END))* 100, 4) AS student_count_change_perc
-                        FROM
-                           student_attendance.student_attendance_master sam 
-                        LEFT join
-                        dimensions.district d on sam.district_id = d.district_id 
-                        LEFT JOIN
-                            dimensions.class cc ON sam.class_id = cc.class_id 
-                        where
-                          sam.date in ( startDate,endDate)  
-                        GROUP BY
-                            sam.district_id, d.district_name) as perc_sum
-                        `
+                    from (select 
+district_id,
+district_name as level,
+coalesce(ROUND(
+            (
+                SUM(CASE WHEN sam.date = endDate THEN count_attendance END) - 
+                SUM(CASE WHEN sam.date = startDate THEN count_attendance END)
+            )::numeric / 
+            SUM(CASE WHEN sam.date = startDate THEN count_attendance END) * 100, 
+        4),0) as student_count_change_perc from
+ student_attendance.stud_avg_dis sam
+join
+dimensions.class cc on sam.class = cc.class_id
+ where
+                  sam.date in ( startDate,endDate)  
+                GROUP BY
+                    sam.district_id, sam.district_name) as perc_sum ;`
                     },
                     "level": "district"
                 }
@@ -1920,48 +1764,48 @@ student_comparative_bignumber: {
                 "hierarchyLevel": "2",
                 "timeSeriesQueries": {
                     "bigNumber": `SELECT ROUND(AVG(student_count_change_perc),4) as sum_perc
-                    from ( SELECT
-                        sam.district_id,
-                        d.district_name,
-                        sam.block_id ,
-                        b.block_name,
-                    ROUND((COUNT(CASE WHEN sam.date = endDate THEN sam.attendance_status END) - COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END))::numeric / (COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END)) *100, 4) AS student_count_change_perc
-                    FROM
-                       student_attendance.student_attendance_master sam 
-                    LEFT join
-                    dimensions.district d on sam.district_id = d.district_id 
-                    LEFT JOIN
-                        dimensions.class cc ON sam.class_id = cc.class_id 
-                    LEFT join
-                        dimensions.block b on sam.block_id = b.block_id 
-                    where
-                      sam.date in ( startDate,endDate)  
-                      and sam.district_id = {district_id}
-                    GROUP BY
-                        sam.district_id, d.district_name, sam.block_id , b.block_name) as perc_sum `
+                    from (select 
+district_id,
+district_name,
+block_id,
+block_name as level,
+coalesce(ROUND(
+            (
+                SUM(CASE WHEN sam.date = endDate THEN count_attendance END) - 
+                SUM(CASE WHEN sam.date = startDate THEN count_attendance END)
+            )::numeric / 
+            SUM(CASE WHEN sam.date = startDate THEN count_attendance END) * 100, 
+        4),0) as student_count_change_perc from
+ student_attendance.stud_avg_block sam
+join
+dimensions.class cc on sam.class = cc.class_id
+ where
+                  sam.date in ( startDate,endDate)  and district_id = {district_id}
+                GROUP BY
+                    sam.district_id, sam.district_name , block_id,block_name) as perc_sum;`
                 },
                 "actions": {
                     "queries": {
                         "bigNumber": `SELECT ROUND(AVG(student_count_change_perc),4) as sum_perc
-                        from ( SELECT
-                            sam.district_id,
-                            d.district_name,
-                            sam.block_id ,
-                            b.block_name,
-                        ROUND((COUNT(CASE WHEN sam.date = endDate THEN sam.attendance_status END) - COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END))::numeric / (COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END)) *100, 4) AS student_count_change_perc
-                        FROM
-                           student_attendance.student_attendance_master sam 
-                        LEFT join
-                        dimensions.district d on sam.district_id = d.district_id 
-                        LEFT JOIN
-                            dimensions.class cc ON sam.class_id = cc.class_id 
-                        LEFT join
-                            dimensions.block b on sam.block_id = b.block_id 
-                        where
-                          sam.date in ( startDate,endDate)  
-                          and sam.district_id = {district_id}
-                        GROUP BY
-                            sam.district_id, d.district_name, sam.block_id , b.block_name) as perc_sum `
+                    from (select 
+district_id,
+district_name,
+block_id,
+block_name as level,
+coalesce(ROUND(
+            (
+                SUM(CASE WHEN sam.date = endDate THEN count_attendance END) - 
+                SUM(CASE WHEN sam.date = startDate THEN count_attendance END)
+            )::numeric / 
+            SUM(CASE WHEN sam.date = startDate THEN count_attendance END) * 100, 
+        4),0) as student_count_change_perc from
+ student_attendance.stud_avg_block sam
+join
+dimensions.class cc on sam.class = cc.class_id
+ where
+                  sam.date in ( startDate,endDate)  and district_id = {district_id}
+                GROUP BY
+                    sam.district_id, sam.district_name , block_id,block_name) as perc_sum;`
                     },
                     "level": "block"
                 }
@@ -1974,61 +1818,53 @@ student_comparative_bignumber: {
                 "hierarchyLevel": "3",
                 "timeSeriesQueries": {
                     "bigNumber": `SELECT ROUND(AVG(student_count_change_perc),4) as sum_perc
-                    from ( SELECT
-                        sam.district_id,
-                        d.district_name,
-                        sam.block_id ,
-                        b.block_name,
-                        sam.cluster_id ,
-                        c.cluster_name,
-                    ROUND((COUNT(CASE WHEN sam.date = endDate THEN sam.attendance_status END) - COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END))::numeric / (COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END)) *100,4) AS student_count_change_perc
-                    FROM
-                       student_attendance.student_attendance_master sam 
-                    LEFT join
-                    dimensions.district d on sam.district_id = d.district_id 
-                    LEFT JOIN
-                        dimensions.class cc ON sam.class_id = cc.class_id 
-                    LEFT join
-                        dimensions.block b on sam.block_id = b.block_id 
-                    left join 
-                        dimensions.cluster c on sam.cluster_id = c.cluster_id
-                    where
-                      sam.date in ( startDate,endDate)  
-                      and sam.block_id  = {block_id}
-                    GROUP BY
-                        sam.district_id, d.district_name, sam.block_id , b.block_name ,
-                        sam.cluster_id, c.cluster_name ) as perc_sum
-                    `,
+                    from (select 
+district_id,
+district_name,
+block_id,
+block_name,
+cluster_id,
+cluster_name as level,
+coalesce(ROUND(
+            (
+                SUM(CASE WHEN sam.date = endDate THEN count_attendance END) - 
+                SUM(CASE WHEN sam.date = startDate THEN count_attendance END)
+            )::numeric / 
+            SUM(CASE WHEN sam.date = startDate THEN count_attendance END) * 100, 
+        4),0) as student_count_change_perc from
+ student_attendance.stud_avg_cluster sam
+join
+dimensions.class cc on sam.class = cc.class_id
+ where
+                  sam.date in ( startDate,endDate)  and block_id = {block_id}
+                GROUP BY
+                    sam.district_id, sam.district_name , block_id,block_name,cluster_id, cluster_name) as perc_sum;`,
                     
                 },
                 "actions": {
                     "queries": {
                         "bigNumber": `SELECT ROUND(AVG(student_count_change_perc),4) as sum_perc
-                        from ( SELECT
-                            sam.district_id,
-                            d.district_name,
-                            sam.block_id ,
-                            b.block_name,
-                            sam.cluster_id ,
-                            c.cluster_name,
-                        ROUND((COUNT(CASE WHEN sam.date = endDate THEN sam.attendance_status END) - COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END))::numeric / (COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END)) *100,4) AS student_count_change_perc
-                        FROM
-                           student_attendance.student_attendance_master sam 
-                        LEFT join
-                        dimensions.district d on sam.district_id = d.district_id 
-                        LEFT JOIN
-                            dimensions.class cc ON sam.class_id = cc.class_id 
-                        LEFT join
-                            dimensions.block b on sam.block_id = b.block_id 
-                        left join 
-                            dimensions.cluster c on sam.cluster_id = c.cluster_id
-                        where
-                          sam.date in ( startDate,endDate)  
-                          and sam.block_id  = {block_id}
-                        GROUP BY
-                            sam.district_id, d.district_name, sam.block_id , b.block_name ,
-                            sam.cluster_id, c.cluster_name ) as perc_sum
-                        `,
+                    from (select 
+district_id,
+district_name,
+block_id,
+block_name,
+cluster_id,
+cluster_name as level,
+coalesce(ROUND(
+            (
+                SUM(CASE WHEN sam.date = endDate THEN count_attendance END) - 
+                SUM(CASE WHEN sam.date = startDate THEN count_attendance END)
+            )::numeric / 
+            SUM(CASE WHEN sam.date = startDate THEN count_attendance END) * 100, 
+        4),0) as student_count_change_perc from
+ student_attendance.stud_avg_cluster sam
+join
+dimensions.class cc on sam.class = cc.class_id
+ where
+                  sam.date in ( startDate,endDate)  and block_id = {block_id}
+                GROUP BY
+                    sam.district_id, sam.district_name , block_id,block_name,cluster_id, cluster_name) as perc_sum; `,
                        
                     },
                     "level": "cluster"
@@ -2040,71 +1876,57 @@ student_comparative_bignumber: {
                 "valueProp": "cluster_id",
                 "hierarchyLevel": "4",
                 "timeSeriesQueries": {
-                    "bigNumber": `SELECT ROUND(AVG(student_count_change_perc),4) as sum_perc
-                    from ( SELECT
-                        sam.district_id,
-                        d.district_name,
-                        sam.block_id ,
-                        b.block_name,
-                        sam.cluster_id ,
-                        c.cluster_name,
-                        sam.school_id,
-                        sch.school_name,
-                     ROUND((COUNT(CASE WHEN sam.date = endDate THEN sam.attendance_status END) - COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END))::numeric / (COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END)) *100,4) AS student_count_change_perc
-                     FROM
-                       student_attendance.student_attendance_master sam 
-                    LEFT join
-                    dimensions.district d on sam.district_id = d.district_id 
-                    LEFT JOIN
-                        dimensions.class cc ON sam.class_id = cc.class_id 
-                    LEFT join
-                        dimensions.block b on sam.block_id = b.block_id 
-                    left join 
-                        dimensions.cluster c on sam.cluster_id = c.cluster_id
-                    left join 
-                        dimensions.school sch on sam.school_id = sch.school_id 
-                    where
-                      sam.date in ( startDate,endDate)  
-                      and sam.cluster_id  = {cluster_id}
-                    GROUP BY
-                        sam.district_id, d.district_name, sam.block_id , b.block_name ,
-                        sam.cluster_id, c.cluster_name , sam.school_id , sch.school_name) as perc_sum 
-                    `,
+                    "bigNumber": ` SELECT ROUND(AVG(student_count_change_perc),4) as sum_perc
+                    from (select 
+district_id,
+district_name,
+block_id,
+block_name,
+cluster_id,
+cluster_name,
+school_id,
+school_name as level,
+coalesce(ROUND(
+            (
+                SUM(CASE WHEN sam.date = endDate THEN count_attendance END) - 
+                SUM(CASE WHEN sam.date = startDate THEN count_attendance END)
+            )::numeric / 
+            SUM(CASE WHEN sam.date = startDate THEN count_attendance END) * 100, 
+        4),0) as student_count_change_perc from
+ student_attendance.stud_avg_school sam
+join
+dimensions.class cc on sam.class = cc.class_id
+ where
+                  sam.date in ( startDate,endDate)  and cluster_id = {cluster_id}
+                GROUP BYsam.district_id, sam.district_name , block_id,block_name,cluster_id, cluster_name,school_id,school_name) as perc_sum;`,
                    
                 },
                 "actions": {
                     "queries": {
-                        "bigNumber": `SELECT ROUND(AVG(student_count_change_perc),4) as sum_perc
-                        from ( SELECT
-                            sam.district_id,
-                            d.district_name,
-                            sam.block_id ,
-                            b.block_name,
-                            sam.cluster_id ,
-                            c.cluster_name,
-                            sam.school_id,
-                            sch.school_name,
-                         ROUND((COUNT(CASE WHEN sam.date = endDate THEN sam.attendance_status END) - COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END))::numeric / (COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END)) *100,4) AS student_count_change_perc
-                         FROM
-                           student_attendance.student_attendance_master sam 
-                        LEFT join
-                        dimensions.district d on sam.district_id = d.district_id 
-                        LEFT JOIN
-                            dimensions.class cc ON sam.class_id = cc.class_id 
-                        LEFT join
-                            dimensions.block b on sam.block_id = b.block_id 
-                        left join 
-                            dimensions.cluster c on sam.cluster_id = c.cluster_id
-                        left join 
-                            dimensions.school sch on sam.school_id = sch.school_id 
-                        where
-                          sam.date in ( startDate,endDate)  
-                          and sam.cluster_id  = {cluster_id}
-                        GROUP BY
-                            sam.district_id, d.district_name, sam.block_id , b.block_name ,
-                            sam.cluster_id, c.cluster_name , sam.school_id , sch.school_name) as perc_sum 
-                        
-    `,
+                        "bigNumber": ` SELECT ROUND(AVG(student_count_change_perc),4) as sum_perc
+                    from (select 
+district_id,
+district_name,
+block_id,
+block_name,
+cluster_id,
+cluster_name,
+school_id,
+school_name as level,
+coalesce(ROUND(
+            (
+                SUM(CASE WHEN sam.date = endDate THEN count_attendance END) - 
+                SUM(CASE WHEN sam.date = startDate THEN count_attendance END)
+            )::numeric / 
+            SUM(CASE WHEN sam.date = startDate THEN count_attendance END) * 100, 
+        4),0) as student_count_change_perc from
+ student_attendance.stud_avg_school sam
+join
+dimensions.class cc on sam.class = cc.class_id
+ where
+                  sam.date in ( startDate,endDate)  and cluster_id = {cluster_id}
+                GROUP BY
+                    sam.district_id, sam.district_name , block_id,block_name,cluster_id, cluster_name,school_id,school_name) as perc_sum;`,
                         
                     },
                     "level": "school"
@@ -2132,52 +1954,46 @@ student_comparative_bignumber: {
                 "hierarchyLevel": "1",
                 "timeSeriesQueries": {
                     "table": `
-                    SELECT
-    sam.district_id,
-    d.district_name,
-    sam.school_id,
-    sch.school_name,
-    SUM(CASE WHEN sam.date = startDate THEN 1 ELSE 0 END) AS date1_count,
-    SUM(CASE WHEN sam.date = endDate THEN 1 ELSE 0 END) AS date2_count,
-    SUM(CASE WHEN sam.date = endDate THEN 1 ELSE 0 END) - SUM(CASE WHEN sam.date = startDate THEN 1 ELSE 0 END) AS student_count_change
-FROM
-    student_attendance.student_attendance_master sam
-JOIN
-    dimensions.district d ON sam.district_id = d.district_id
-JOIN
-    dimensions.school sch ON sam.school_id = sch.school_id
-    JOIN
-    dimensions.class cc ON sam.class_id = cc.class_id
-WHERE
-    sam.date IN (startDate, endDate)
-GROUP BY
-    sam.district_id, d.district_name, sam.school_id, sch.school_name; `
+                   SELECT
+        sam.district_id,
+        sam.district_name,
+        sam.school_name,
+        sam.school_id,
+        SUM(CASE WHEN sam.date = startDate THEN sam.count_attendance END) AS date1_count,
+        SUM(CASE WHEN sam.date = endDate THEN sam.count_attendance END) AS date2_count,
+        SUM(CASE WHEN sam.date = endDate THEN sam.count_attendance ELSE 0 END) - 
+        SUM(CASE WHEN sam.date = startDate THEN sam.count_attendance ELSE 0 END) AS student_count_change
+    FROM
+        student_attendance.stud_avg_school sam
+join
+dimensions.class cc on sam.class = cc.class_id 
+    WHERE
+        sam.date IN (startDate, endDate)   
+    GROUP BY
+        sam.district_id, sam.district_name ,sam.school_id,sam.school_name ; `
                 },
                 "actions": {
                     "queries": {
                         "table": `
                         SELECT
-    sam.district_id,
-    d.district_name,
-    sam.school_id,
-    sch.school_name,
-    SUM(CASE WHEN sam.date = startDate THEN 1 ELSE 0 END) AS date1_count,
-    SUM(CASE WHEN sam.date = endDate THEN 1 ELSE 0 END) AS date2_count,
-    SUM(CASE WHEN sam.date = endDate THEN 1 ELSE 0 END) - SUM(CASE WHEN sam.date = startDate THEN 1 ELSE 0 END) AS student_count_change
-FROM
-    student_attendance.student_attendance_master sam
-JOIN
-    dimensions.district d ON sam.district_id = d.district_id
-JOIN
-    dimensions.school sch ON sam.school_id = sch.school_id
-    JOIN
-    dimensions.class cc ON sam.class_id = cc.class_id
-WHERE
-    sam.date IN (startDate, endDate)
-GROUP BY
-    sam.district_id, d.district_name, sam.school_id, sch.school_name; `,
+        sam.district_id,
+        sam.district_name,
+        sam.school_name,
+        sam.school_id,
+        SUM(CASE WHEN sam.date = startDate THEN sam.count_attendance END) AS date1_count,
+        SUM(CASE WHEN sam.date = endDate THEN sam.count_attendance END) AS date2_count,
+        SUM(CASE WHEN sam.date = endDate THEN sam.count_attendance ELSE 0 END) - 
+        SUM(CASE WHEN sam.date = startDate THEN sam.count_attendance ELSE 0 END) AS student_count_change
+    FROM
+        student_attendance.stud_avg_school sam
+join
+dimensions.class cc on sam.class = cc.class_id 
+    WHERE
+        sam.date IN (startDate, endDate)   
+    GROUP BY
+        sam.district_id, sam.district_name ,sam.school_id,sam.school_name; `,
                     },
-                    "level": "school"
+                    "level": "district"
                 }
             },
             {
@@ -2187,73 +2003,49 @@ GROUP BY
                 "hierarchyLevel": "2",
                 "timeSeriesQueries": {
                     "table": `SELECT
-                    sam.district_id,
-                    d.district_name,
-                    sam.block_id,
-                    b.block_name,
-                    sam.school_id,
-                    sch.school_name,
-                    SUM(CASE WHEN sam.date = startDate THEN sam.attendance_status END) AS date1_count,
-                    SUM(CASE WHEN sam.date = endDate THEN sam.attendance_status END) AS date2_count,
-                    SUM(CASE WHEN sam.date = endDate THEN sam.attendance_status END) - SUM(CASE WHEN sam.date = startDate THEN sam.attendance_status END) AS student_count_change
-                FROM
-                    student_attendance.student_attendance_master sam
-                JOIN
-                    dimensions.district d ON sam.district_id = d.district_id
-                JOIN
-                    dimensions.class cc ON sam.class_id = cc.class_id
-                JOIN
-                    dimensions.block b ON sam.block_id = b.block_id
-                JOIN
-                    dimensions.school sch ON sam.school_id = sch.school_id
-                WHERE
-                    
-                    sam.date IN (startDate, endDate)
-                    AND sam.district_id = {district_id}
-                GROUP BY
-                    sam.district_id,
-                    d.district_name,
-                    sam.block_id,
-                    b.block_name,
-                    sam.school_id,
-                    sch.school_name;`
+        sam.district_id,
+        sam.district_name,
+        sam.block_name,
+        sam.block_id,
+        sam.school_name,
+        sam.school_id,
+        SUM(CASE WHEN sam.date = startDate THEN sam.count_attendance END) AS date1_count,
+        SUM(CASE WHEN sam.date = endDate THEN sam.count_attendance END) AS date2_count,
+        SUM(CASE WHEN sam.date = endDate THEN sam.count_attendance ELSE 0 END) - 
+        SUM(CASE WHEN sam.date = startDate THEN sam.count_attendance ELSE 0 END) AS student_count_change
+    FROM
+        student_attendance.stud_avg_school sam 
+join
+dimensions.class cc on sam.class = cc.class_id
+    WHERE
+        sam.date IN (startDate, endDate) and sam.district_id = {district_id}  
+    GROUP BY
+        sam.district_id, sam.district_name ,sam.block_id , sam.block_name,sam.school_id,sam.school_name                          
+                    ;`
                 },
                 "actions": {
                     "queries": {
                         "table": `SELECT
-                        sam.district_id,
-                        d.district_name,
-                        sam.block_id,
-                        b.block_name,
-                        sam.school_id,
-                        sch.school_name,
-                        SUM(CASE WHEN sam.date = startDate THEN sam.attendance_status END) AS date1_count,
-                        SUM(CASE WHEN sam.date = endDate THEN sam.attendance_status END) AS date2_count,
-                        SUM(CASE WHEN sam.date = endDate THEN sam.attendance_status END) - SUM(CASE WHEN sam.date = startDate THEN sam.attendance_status END) AS student_count_change
-                    FROM
-                        student_attendance.student_attendance_master sam
-                    JOIN
-                        dimensions.district d ON sam.district_id = d.district_id
-                    JOIN
-                        dimensions.class cc ON sam.class_id = cc.class_id
-                    JOIN
-                        dimensions.block b ON sam.block_id = b.block_id
-                    JOIN
-                        dimensions.school sch ON sam.school_id = sch.school_id
-                    WHERE
-                        
-                        sam.date IN (startDate, endDate)
-                        AND sam.district_id = {district_id}
-                    GROUP BY
-                        sam.district_id,
-                        d.district_name,
-                        sam.block_id,
-                        b.block_name,
-                        sam.school_id,
-                        sch.school_name;
-    `,
+        sam.district_id,
+        sam.district_name,
+        sam.block_name,
+        sam.block_id,
+        sam.school_name,
+        sam.school_id,
+        SUM(CASE WHEN sam.date = startDate THEN sam.count_attendance END) AS date1_count,
+        SUM(CASE WHEN sam.date = endDate THEN sam.count_attendance END) AS date2_count,
+        SUM(CASE WHEN sam.date = endDate THEN sam.count_attendance ELSE 0 END) - 
+        SUM(CASE WHEN sam.date = startDate THEN sam.count_attendance ELSE 0 END) AS student_count_change
+    FROM
+        student_attendance.stud_avg_school sam 
+join
+dimensions.class cc on sam.class = cc.class_id
+    WHERE
+        sam.date IN (startDate, endDate) and sam.district_id = {district_id}  
+    GROUP BY
+        sam.district_id, sam.district_name ,sam.block_id , sam.block_name,sam.school_id,sam.school_name ;`,
                     },
-                    "level": "school"
+                    "level": "block"
                 }
             },
             {
@@ -2263,84 +2055,53 @@ GROUP BY
                 "hierarchyLevel": "3",
                 "timeSeriesQueries": {
                     "table": `SELECT
-                    sam.district_id,
-                    d.district_name,
-                    sam.block_id,
-                    b.block_name,
-                    sam.cluster_id,
-                    c.cluster_name,
-                    sam.school_id,
-                    sch.school_name,
-                    SUM(CASE WHEN sam.date = startDate THEN sam.attendance_status END) AS date1_count,
-                    SUM(CASE WHEN sam.date = endDate THEN sam.attendance_status END) AS date2_count,
-                    SUM(CASE WHEN sam.date = endDate THEN sam.attendance_status END) - SUM(CASE WHEN sam.date = startDate THEN sam.attendance_status END) AS student_count_change
-                FROM
-                    student_attendance.student_attendance_master sam
-                JOIN
-                    dimensions.district d ON sam.district_id = d.district_id
-                JOIN
-                    dimensions.class cc ON sam.class_id = cc.class_id
-                JOIN
-                    dimensions.block b ON sam.block_id = b.block_id
-                JOIN
-                    dimensions.cluster c ON sam.cluster_id = c.cluster_id
-                JOIN
-                    dimensions.school sch ON sch.school_id = sam.school_id
-                WHERE
-                 sam.date IN (startDate, endDate)
-                    AND sam.block_id = {block_id}
-                GROUP BY
-                    sam.district_id,
-                    d.district_name,
-                    sam.block_id,
-                    b.block_name,
-                    sam.cluster_id,
-                    c.cluster_name,
-                    sam.school_id,
-                    sch.school_name;
-                    `
+        sam.district_id,
+        sam.district_name,
+        sam.block_name,
+        sam.block_id,
+        sam.cluster_id ,
+        sam.cluster_name ,
+        sam.school_name,
+        sam.school_id,
+        SUM(CASE WHEN sam.date = startDate THEN sam.count_attendance END) AS date1_count,
+        SUM(CASE WHEN sam.date = endDate THEN sam.count_attendance END) AS date2_count,
+        SUM(CASE WHEN sam.date = endDate THEN sam.count_attendance ELSE 0 END) - 
+        SUM(CASE WHEN sam.date = startDate THEN sam.count_attendance ELSE 0 END) AS student_count_change
+    FROM
+        student_attendance.stud_avg_school sam 
+join
+dimensions.class cc on sam.class = cc.class_id
+    WHERE
+        sam.date IN (startDate, endDate) and sam.block_id = {block_id}  
+    GROUP BY
+        sam.district_id, sam.district_name ,sam.block_id , sam.block_name,sam.cluster_id , sam.cluster_name, sam.school_id,sam.school_name ;`
                 },
                 "actions": {
                     "queries": {
                         "table": `SELECT
-                        sam.district_id,
-                        d.district_name,
-                        sam.block_id,
-                        b.block_name,
-                        sam.cluster_id,
-                        c.cluster_name,
-                        sam.school_id,
-                        sch.school_name,
-                        SUM(CASE WHEN sam.date = startDate THEN sam.attendance_status END) AS date1_count,
-                        SUM(CASE WHEN sam.date = endDate THEN sam.attendance_status END) AS date2_count,
-                        SUM(CASE WHEN sam.date = endDate THEN sam.attendance_status END) - SUM(CASE WHEN sam.date = startDate THEN sam.attendance_status END) AS student_count_change
-                    FROM
-                        student_attendance.student_attendance_master sam
-                    JOIN
-                        dimensions.district d ON sam.district_id = d.district_id
-                    JOIN
-                        dimensions.class cc ON sam.class_id = cc.class_id
-                    JOIN
-                        dimensions.block b ON sam.block_id = b.block_id
-                    JOIN
-                        dimensions.cluster c ON sam.cluster_id = c.cluster_id
-                    JOIN
-                        dimensions.school sch ON sch.school_id = sam.school_id
-                    WHERE
-                     sam.date IN (startDate, endDate)
-                        AND sam.block_id = {block_id}
-                    GROUP BY
-                        sam.district_id,
-                        d.district_name,
-                        sam.block_id,
-                        b.block_name,
-                        sam.cluster_id,
-                        c.cluster_name,
-                        sam.school_id,
-                        sch.school_name;
+        sam.district_id,
+        sam.district_name,
+        sam.block_name,
+        sam.block_id,
+        sam.cluster_id ,
+        sam.cluster_name ,
+        sam.school_name,
+        sam.school_id,
+        SUM(CASE WHEN sam.date = startDate THEN sam.count_attendance END) AS date1_count,
+        SUM(CASE WHEN sam.date = endDate THEN sam.count_attendance END) AS date2_count,
+        SUM(CASE WHEN sam.date = endDate THEN sam.count_attendance ELSE 0 END) - 
+        SUM(CASE WHEN sam.date = startDate THEN sam.count_attendance ELSE 0 END) AS student_count_change
+    FROM
+        student_attendance.stud_avg_school sam 
+join
+dimensions.class cc on sam.class = cc.class_id
+    WHERE
+        sam.date IN (startDate, endDate) and sam.block_id = {block_id}  
+    GROUP BY
+        sam.district_id, sam.district_name ,sam.block_id , sam.block_name,sam.cluster_id , sam.cluster_name, sam.school_id,sam.school_name;
     `,
                     },
-                    "level": "school"
+                    "level": "cluster"
                 }
             },
             {
@@ -2349,71 +2110,51 @@ GROUP BY
                 "valueProp": "cluster_id",
                 "hierarchyLevel": "4",
                 "timeSeriesQueries": {
-                    "table":`SELECT
-                    sam.district_id,
-                    d.district_name,
-                    sam.block_id ,
-                    b.block_name,
-                    sam.cluster_id ,
-                    c.cluster_name,
-                    sam.school_id,
-                    sch.school_name,
-                    SUM(CASE WHEN sam.date = startDate THEN sam.attendance_status END) AS date1_count,
-                    SUM(CASE WHEN sam.date = endDate THEN sam.attendance_status END) AS date2_count,
-                    SUM(CASE WHEN sam.date = endDate THEN sam.attendance_status END) - SUM(CASE WHEN sam.date = startDate THEN sam.attendance_status END) AS student_count_change
-                FROM
-                   student_attendance.student_attendance_master sam 
-                 join
-                dimensions.district d on sam.district_id = d.district_id 
-                 JOIN
-                    dimensions.class cc ON sam.class_id = cc.class_id 
-                 join
-                    dimensions.block b on sam.block_id = b.block_id 
-                 join 
-                    dimensions.cluster c on sam.cluster_id = c.cluster_id
-                 join 
-                    dimensions.school sch on sam.school_id = sch.school_id 
-                where
-                  sam.date in ( startDate,endDate) 
-                  and sam.cluster_id  = {cluster_id}
-                GROUP BY
-                    sam.district_id, d.district_name, sam.block_id , b.block_name ,
-                    sam.cluster_id, c.cluster_name , sam.school_id , sch.school_name 
-                `
+                    "table":`    SELECT
+        sam.district_id,
+        sam.district_name,
+        sam.block_name,
+        sam.block_id,
+        sam.cluster_id ,
+        sam.cluster_name ,
+        sam.school_name,
+        sam.school_id,
+        SUM(CASE WHEN sam.date = startDate THEN sam.count_attendance END) AS date1_count,
+        SUM(CASE WHEN sam.date = endDate THEN sam.count_attendance END) AS date2_count,
+        SUM(CASE WHEN sam.date = endDate THEN sam.count_attendance ELSE 0 END) - 
+        SUM(CASE WHEN sam.date = startDate THEN sam.count_attendance ELSE 0 END) AS student_count_change
+    FROM
+        student_attendance.stud_avg_school sam 
+join
+dimensions.class cc on sam.class = cc.class_id
+    WHERE
+        sam.date IN (startDate, endDate) and sam.cluster_id = {cluster_id}  
+    GROUP BY
+        sam.district_id, sam.district_name ,sam.block_id , sam.block_name,sam.cluster_id , sam.cluster_name, sam.school_id,sam.school_name  ;`
                 },
                 "actions": {
                     "queries": {
-                        "table": `SELECT
-                        sam.district_id,
-                        d.district_name,
-                        sam.block_id ,
-                        b.block_name,
-                        sam.cluster_id ,
-                        c.cluster_name,
-                        sam.school_id,
-                        sch.school_name,
-                        SUM(CASE WHEN sam.date = startDate THEN sam.attendance_status END) AS date1_count,
-                        SUM(CASE WHEN sam.date = endDate THEN sam.attendance_status END) AS date2_count,
-                        SUM(CASE WHEN sam.date = endDate THEN sam.attendance_status END) - SUM(CASE WHEN sam.date = startDate THEN sam.attendance_status END) AS student_count_change
-                    FROM
-                       student_attendance.student_attendance_master sam 
-                     join
-                    dimensions.district d on sam.district_id = d.district_id 
-                     JOIN
-                        dimensions.class cc ON sam.class_id = cc.class_id 
-                     join
-                        dimensions.block b on sam.block_id = b.block_id 
-                     join 
-                        dimensions.cluster c on sam.cluster_id = c.cluster_id
-                     join 
-                        dimensions.school sch on sam.school_id = sch.school_id 
-                    where
-                      sam.date in ( startDate,endDate) 
-                      and sam.cluster_id  = {cluster_id}
-                    GROUP BY
-                        sam.district_id, d.district_name, sam.block_id , b.block_name ,
-                        sam.cluster_id, c.cluster_name , sam.school_id , sch.school_name 
-                    `,
+                        "table": `   SELECT
+        sam.district_id,
+        sam.district_name,
+        sam.block_name,
+        sam.block_id,
+        sam.cluster_id ,
+        sam.cluster_name ,
+        sam.school_name,
+        sam.school_id,
+        SUM(CASE WHEN sam.date = startDate THEN sam.count_attendance END) AS date1_count,
+        SUM(CASE WHEN sam.date = endDate THEN sam.count_attendance END) AS date2_count,
+        SUM(CASE WHEN sam.date = endDate THEN sam.count_attendance ELSE 0 END) - 
+        SUM(CASE WHEN sam.date = startDate THEN sam.count_attendance ELSE 0 END) AS student_count_change
+    FROM
+        student_attendance.stud_avg_school sam 
+join
+dimensions.class cc on sam.class = cc.class_id
+    WHERE
+        sam.date IN (startDate, endDate) and sam.cluster_id = {cluster_id}  
+    GROUP BY
+        sam.district_id, sam.district_name ,sam.block_id , sam.block_name,sam.cluster_id , sam.cluster_name, sam.school_id,sam.school_name ;`,
                     },
                     "level": "school"
                 }
@@ -2424,69 +2165,51 @@ GROUP BY
                 "valueProp": "school_id",
                 "hierarchyLevel": "5",
                 "timeSeriesQueries": {
-                    "table": `SELECT
-                    sam.district_id,
-                    d.district_name,
-                    sam.block_id ,
-                    b.block_name,
-                    sam.cluster_id ,
-                    c.cluster_name,
-                    sam.school_id,
-                    sch.school_name,
-                    SUM(CASE WHEN sam.date = startDate THEN sam.attendance_status END) AS date1_count,
-                    SUM(CASE WHEN sam.date = endDate THEN sam.attendance_status END) AS date2_count,
-                    SUM(CASE WHEN sam.date = endDate THEN sam.attendance_status END) - SUM(CASE WHEN sam.date = startDate THEN sam.attendance_status END) AS student_count_change
-                FROM
-                   student_attendance.student_attendance_master sam 
-                 join
-                dimensions.district d on sam.district_id = d.district_id 
-                 JOIN
-                    dimensions.class cc ON sam.class_id = cc.class_id 
-                 join
-                    dimensions.block b on sam.block_id = b.block_id 
-                 join 
-                    dimensions.cluster c on sam.cluster_id = c.cluster_id
-                 join 
-                    dimensions.school sch on sam.school_id = sch.school_id 
-                where
-                  sam.date in ( startDate,endDate) 
-                  and sam.school_id  = {school_id}
-                GROUP BY
-                    sam.district_id, d.district_name, sam.block_id , b.block_name ,
-                    sam.cluster_id, c.cluster_name , sam.school_id , sch.school_name `,
+                    "table": ` SELECT
+        sam.district_id,
+        sam.district_name,
+        sam.block_name,
+        sam.block_id,
+        sam.cluster_id ,
+        sam.cluster_name ,
+        sam.school_name,
+        sam.school_id,
+        SUM(CASE WHEN sam.date = startDate THEN sam.count_attendance END) AS date1_count,
+        SUM(CASE WHEN sam.date = endDate THEN sam.count_attendance END) AS date2_count,
+        SUM(CASE WHEN sam.date = endDate THEN sam.count_attendance ELSE 0 END) - 
+        SUM(CASE WHEN sam.date = startDate THEN sam.count_attendance ELSE 0 END) AS student_count_change
+    FROM
+        student_attendance.stud_avg_school sam
+join
+dimensions.class cc on sam.class = cc.class_id 
+    WHERE
+        sam.date IN (startDate, endDate) and sam.school_id = {school_id}  
+    GROUP BY
+        sam.district_id, sam.district_name ,sam.block_id , sam.block_name,sam.cluster_id , sam.cluster_name, sam.school_id,sam.school_name;`,
                 },
                 "actions": {
                     "queries": {
-                        "table":`SELECT
-                        sam.district_id,
-                        d.district_name,
-                        sam.block_id ,
-                        b.block_name,
-                        sam.cluster_id ,
-                        c.cluster_name,
-                        sam.school_id,
-                        sch.school_name,
-                        SUM(CASE WHEN sam.date = startDate THEN sam.attendance_status END) AS date1_count,
-                        SUM(CASE WHEN sam.date = endDate THEN sam.attendance_status END) AS date2_count,
-                        SUM(CASE WHEN sam.date = endDate THEN sam.attendance_status END) - SUM(CASE WHEN sam.date = startDate THEN sam.attendance_status END) AS student_count_change
-                    FROM
-                       student_attendance.student_attendance_master sam 
-                     join
-                    dimensions.district d on sam.district_id = d.district_id 
-                     JOIN
-                        dimensions.class cc ON sam.class_id = cc.class_id 
-                     join
-                        dimensions.block b on sam.block_id = b.block_id 
-                     join 
-                        dimensions.cluster c on sam.cluster_id = c.cluster_id
-                     join 
-                        dimensions.school sch on sam.school_id = sch.school_id 
-                    where
-                      sam.date in ( startDate,endDate) 
-                      and sam.school_id  = {school_id}
-                    GROUP BY
-                        sam.district_id, d.district_name, sam.block_id , b.block_name ,
-                        sam.cluster_id, c.cluster_name , sam.school_id , sch.school_name`,
+                        "table":` SELECT
+        sam.district_id,
+        sam.district_name,
+        sam.block_name,
+        sam.block_id,
+        sam.cluster_id ,
+        sam.cluster_name ,
+        sam.school_name,
+        sam.school_id,
+        SUM(CASE WHEN sam.date = startDate THEN sam.count_attendance END) AS date1_count,
+        SUM(CASE WHEN sam.date = endDate THEN sam.count_attendance END) AS date2_count,
+        SUM(CASE WHEN sam.date = endDate THEN sam.count_attendance ELSE 0 END) - 
+        SUM(CASE WHEN sam.date = startDate THEN sam.count_attendance ELSE 0 END) AS student_count_change
+    FROM
+        student_attendance.stud_avg_school sam
+join
+dimensions.class cc on sam.class = cc.class_id 
+    WHERE
+        sam.date IN (startDate, endDate) and sam.school_id = {school_id}  
+    GROUP BY
+        sam.district_id, sam.district_name ,sam.block_id , sam.block_name,sam.cluster_id , sam.cluster_name, sam.school_id,sam.school_name;`,
                     },
                     "level": "school"
                 }
@@ -2589,39 +2312,43 @@ GROUP BY
                 "valueProp": "state_id",
                 "hierarchyLevel": "1",
                 "timeSeriesQueries": {
-                    "barChart": `SELECT
-                    sam.district_id,
-                    d.district_name as level,
-                   ROUND((COUNT(CASE WHEN sam.date = endDate THEN sam.attendance_status END) - COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END))::numeric / (COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END)) *100, 4) AS student_count_change_perc
-                FROM
-                   student_attendance.student_attendance_master sam 
-                LEFT join
-                dimensions.district d on sam.district_id = d.district_id 
-                LEFT JOIN
-                    dimensions.class cc ON sam.class_id = cc.class_id 
-                where
+                    "barChart": `select 
+district_id,
+district_name as level,
+coalesce(ROUND(
+            (
+                SUM(CASE WHEN sam.date = endDate THEN count_attendance END) - 
+                SUM(CASE WHEN sam.date = startDate THEN count_attendance END)
+            )::numeric / 
+            SUM(CASE WHEN sam.date = startDate THEN count_attendance END) * 100, 
+        4),0) from
+ student_attendance.stud_avg_dis sam
+join
+dimensions.class cc on sam.class = cc.class_id
+ where
                   sam.date in ( startDate,endDate)  
                 GROUP BY
-                    sam.district_id, d.district_name
-                    `,
+                    sam.district_id, sam.district_name ;`,
                 },
                 "actions": {
                     "queries": {
-                        "barChart":`SELECT
-                        sam.district_id,
-                        d.district_name as level,
-                       ROUND((COUNT(CASE WHEN sam.date = endDate THEN sam.attendance_status END) - COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END))::numeric / (COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END)) *100, 4) AS student_count_change_perc
-                    FROM
-                       student_attendance.student_attendance_master sam 
-                    LEFT join
-                    dimensions.district d on sam.district_id = d.district_id 
-                    LEFT JOIN
-                        dimensions.class cc ON sam.class_id = cc.class_id 
-                    where
-                      sam.date in ( startDate,endDate)  
-                    GROUP BY
-                        sam.district_id, d.district_name
-                        `
+                        "barChart":`select 
+district_id,
+district_name as level,
+coalesce(ROUND(
+            (
+                SUM(CASE WHEN sam.date = endDate THEN count_attendance END) - 
+                SUM(CASE WHEN sam.date = startDate THEN count_attendance END)
+            )::numeric / 
+            SUM(CASE WHEN sam.date = startDate THEN count_attendance END) * 100, 
+        4),0) from
+ student_attendance.stud_avg_dis sam
+join
+dimensions.class cc on sam.class = cc.class_id
+ where
+                  sam.date in ( startDate,endDate)  
+                GROUP BY
+                    sam.district_id, sam.district_name ;`
                     
                     },
                     "level": "district"
@@ -2633,48 +2360,48 @@ GROUP BY
                 "valueProp": "district_id",
                 "hierarchyLevel": "2",
                 "timeSeriesQueries": {
-                    "barChart": `SELECT
-                    sam.district_id,
-                    d.district_name,
-                    sam.block_id ,
-                    b.block_name as level,
-                ROUND((COUNT(CASE WHEN sam.date = endDate THEN sam.attendance_status END) - COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END))::numeric / (COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END)) *100, 4) AS student_count_change_perc
-                FROM
-                   student_attendance.student_attendance_master sam 
-                LEFT join
-                dimensions.district d on sam.district_id = d.district_id 
-                LEFT JOIN
-                    dimensions.class cc ON sam.class_id = cc.class_id 
-                LEFT join
-                    dimensions.block b on sam.block_id = b.block_id 
-                where
-                  sam.date in ( startDate,endDate)  
-                  and sam.district_id = {district_id}
+                    "barChart": `select 
+district_id,
+district_name,
+block_id,
+block_name as level,
+coalesce(ROUND(
+            (
+                SUM(CASE WHEN sam.date = endDate THEN count_attendance END) - 
+                SUM(CASE WHEN sam.date = startDate THEN count_attendance END)
+            )::numeric / 
+            SUM(CASE WHEN sam.date = startDate THEN count_attendance END) * 100, 
+        4),0) as student_count_change_perc from
+ student_attendance.stud_avg_block sam
+join
+dimensions.class cc on sam.class = cc.class_id
+ where
+                  sam.date in ( startDate,endDate)  and district_id = {district_id}
                 GROUP BY
-                    sam.district_id, d.district_name, sam.block_id , b.block_name `,
+                    sam.district_id, sam.district_name , block_id,block_name;`,
                 },
                 "actions": {
                     "queries": {
                         "barChart":
-                        `SELECT
-                        sam.district_id,
-                        d.district_name,
-                        sam.block_id ,
-                        b.block_name as level,
-                    ROUND((COUNT(CASE WHEN sam.date = endDate THEN sam.attendance_status END) - COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END))::numeric / (COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END)) *100, 4) AS student_count_change_perc
-                    FROM
-                       student_attendance.student_attendance_master sam 
-                    LEFT join
-                    dimensions.district d on sam.district_id = d.district_id 
-                    LEFT JOIN
-                        dimensions.class cc ON sam.class_id = cc.class_id 
-                    LEFT join
-                        dimensions.block b on sam.block_id = b.block_id 
-                    where
-                      sam.date in ( startDate,endDate)  
-                      and sam.district_id = {district_id}
-                    GROUP BY
-                        sam.district_id, d.district_name, sam.block_id , b.block_name `,
+                        `select 
+district_id,
+district_name,
+block_id,
+block_name as level,
+coalesce(ROUND(
+            (
+                SUM(CASE WHEN sam.date = endDate THEN count_attendance END) - 
+                SUM(CASE WHEN sam.date = startDate THEN count_attendance END)
+            )::numeric / 
+            SUM(CASE WHEN sam.date = startDate THEN count_attendance END) * 100, 
+        4),0) as student_count_change_perc from
+ student_attendance.stud_avg_block sam
+join
+dimensions.class cc on sam.class = cc.class_id
+ where
+                  sam.date in ( startDate,endDate)  and district_id = {district_id}
+                GROUP BY
+                    sam.district_id, sam.district_name , block_id,block_name;`,
                     },
                     "level": "block"
                 }
@@ -2685,57 +2412,51 @@ GROUP BY
                 "valueProp": "block_id",
                 "hierarchyLevel": "3",
                 "timeSeriesQueries": {
-                    "barChart": `SELECT
-                    sam.district_id,
-                    d.district_name,
-                    sam.block_id ,
-                    b.block_name,
-                    sam.cluster_id ,
-                    c.cluster_name as level,
-                ROUND((COUNT(CASE WHEN sam.date = endDate THEN sam.attendance_status END) - COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END))::numeric / (COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END)) *100,4) AS student_count_change_perc
-                FROM
-                   student_attendance.student_attendance_master sam 
-                LEFT join
-                dimensions.district d on sam.district_id = d.district_id 
-                LEFT JOIN
-                    dimensions.class cc ON sam.class_id = cc.class_id 
-                LEFT join
-                    dimensions.block b on sam.block_id = b.block_id 
-                left join 
-                    dimensions.cluster c on sam.cluster_id = c.cluster_id
-                where
-                  sam.date in ( startDate,endDate)  
-                  and sam.block_id  = {block_id}
+                    "barChart": `select 
+district_id,
+district_name,
+block_id,
+block_name,
+cluster_id,
+cluster_name as level,
+coalesce(ROUND(
+            (
+                SUM(CASE WHEN sam.date = endDate THEN count_attendance END) - 
+                SUM(CASE WHEN sam.date = startDate THEN count_attendance END)
+            )::numeric / 
+            SUM(CASE WHEN sam.date = startDate THEN count_attendance END) * 100, 
+        4),0) as student_count_change_perc from
+ student_attendance.stud_avg_cluster sam
+join
+dimensions.class cc on sam.class = cc.class_id
+ where
+                  sam.date in ( startDate,endDate)  and block_id = {block_id}
                 GROUP BY
-                    sam.district_id, d.district_name, sam.block_id , b.block_name ,
-                    sam.cluster_id, c.cluster_name `,
+                    sam.district_id, sam.district_name , block_id,block_name,cluster_id, cluster_name;`,
                 },
                 "actions": {
                     "queries": {
-                        "barChart":`SELECT
-                        sam.district_id,
-                        d.district_name,
-                        sam.block_id ,
-                        b.block_name,
-                        sam.cluster_id ,
-                        c.cluster_name as level,
-                    ROUND((COUNT(CASE WHEN sam.date = endDate THEN sam.attendance_status END) - COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END))::numeric / (COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END)) *100,4) AS student_count_change_perc
-                    FROM
-                       student_attendance.student_attendance_master sam 
-                    LEFT join
-                    dimensions.district d on sam.district_id = d.district_id 
-                    LEFT JOIN
-                        dimensions.class cc ON sam.class_id = cc.class_id 
-                    LEFT join
-                        dimensions.block b on sam.block_id = b.block_id 
-                    left join 
-                        dimensions.cluster c on sam.cluster_id = c.cluster_id
-                    where
-                      sam.date in ( startDate,endDate)  
-                      and sam.block_id  = {block_id}
-                    GROUP BY
-                        sam.district_id, d.district_name, sam.block_id , b.block_name ,
-                        sam.cluster_id, c.cluster_name `
+                        "barChart":`select 
+district_id,
+district_name,
+block_id,
+block_name,
+cluster_id,
+cluster_name as level,
+coalesce(ROUND(
+            (
+                SUM(CASE WHEN sam.date = endDate THEN count_attendance END) - 
+                SUM(CASE WHEN sam.date = startDate THEN count_attendance END)
+            )::numeric / 
+            SUM(CASE WHEN sam.date = startDate THEN count_attendance END) * 100, 
+        4),0) as student_count_change_perc from
+ student_attendance.stud_avg_cluster sam
+join
+dimensions.class cc on sam.class = cc.class_id
+ where
+                  sam.date in ( startDate,endDate)  and block_id = {block_id}
+                GROUP BY
+                    sam.district_id, sam.district_name , block_id,block_name,cluster_id, cluster_name; `
                     },
                     "level": "cluster"
                 }
@@ -2746,69 +2467,55 @@ GROUP BY
                 "valueProp": "cluster_id",
                 "hierarchyLevel": "4",
                 "timeSeriesQueries": {
-                    "barChart": `SELECT
-                    sam.district_id,
-                    d.district_name,
-                    sam.block_id ,
-                    b.block_name,
-                    sam.cluster_id ,
-                    c.cluster_name,
-                    sam.school_id,
-                    sch.school_name as level,
-                 ROUND((COUNT(CASE WHEN sam.date = endDate THEN sam.attendance_status END) - COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END))::numeric / (COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END)) *100,4) AS student_count_change_perc
-                FROM
-                   student_attendance.student_attendance_master sam 
-                LEFT join
-                dimensions.district d on sam.district_id = d.district_id 
-                LEFT JOIN
-                    dimensions.class cc ON sam.class_id = cc.class_id 
-                LEFT join
-                    dimensions.block b on sam.block_id = b.block_id 
-                left join 
-                    dimensions.cluster c on sam.cluster_id = c.cluster_id
-                left join 
-                    dimensions.school sch on sam.school_id = sch.school_id 
-                where
-                  sam.date in ( startDate,endDate)  
-                  and sam.cluster_id  = {cluster_id}
+                    "barChart": `select 
+district_id,
+district_name,
+block_id,
+block_name,
+cluster_id,
+cluster_name,
+school_id,
+school_name as level,
+coalesce(ROUND(
+            (
+                SUM(CASE WHEN sam.date = endDate THEN count_attendance END) - 
+                SUM(CASE WHEN sam.date = startDate THEN count_attendance END)
+            )::numeric / 
+            SUM(CASE WHEN sam.date = startDate THEN count_attendance END) * 100, 
+        4),0) as student_count_change_perc from
+ student_attendance.stud_avg_school sam
+join
+dimensions.class cc on sam.class = cc.class_id
+ where
+                  sam.date in ( startDate,endDate)  and cluster_id = {cluster_id}
                 GROUP BY
-                    sam.district_id, d.district_name, sam.block_id , b.block_name ,
-                    sam.cluster_id, c.cluster_name , sam.school_id , sch.school_name 
-                
-                `,
+                    sam.district_id, sam.district_name , block_id,block_name,cluster_id, cluster_name,school_id,school_name;`,
                 },
                 "actions": {
                     "queries": {
-                        "barChart":`SELECT
-                        sam.district_id,
-                        d.district_name,
-                        sam.block_id ,
-                        b.block_name,
-                        sam.cluster_id ,
-                        c.cluster_name,
-                        sam.school_id,
-                        sch.school_name as level,
-                     ROUND((COUNT(CASE WHEN sam.date = endDate THEN sam.attendance_status END) - COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END))::numeric / (COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END)) *100,4) AS student_count_change_perc
-                    FROM
-                       student_attendance.student_attendance_master sam 
-                    LEFT join
-                    dimensions.district d on sam.district_id = d.district_id 
-                    LEFT JOIN
-                        dimensions.class cc ON sam.class_id = cc.class_id 
-                    LEFT join
-                        dimensions.block b on sam.block_id = b.block_id 
-                    left join 
-                        dimensions.cluster c on sam.cluster_id = c.cluster_id
-                    left join 
-                        dimensions.school sch on sam.school_id = sch.school_id 
-                    where
-                      sam.date in ( startDate,endDate)  
-                      and sam.cluster_id  = {cluster_id}
-                    GROUP BY
-                        sam.district_id, d.district_name, sam.block_id , b.block_name ,
-                        sam.cluster_id, c.cluster_name , sam.school_id , sch.school_name 
-                    
-                    `
+                        "barChart":`select 
+district_id,
+district_name,
+block_id,
+block_name,
+cluster_id,
+cluster_name,
+school_id,
+school_name as level,
+coalesce(ROUND(
+            (
+                SUM(CASE WHEN sam.date = endDate THEN count_attendance END) - 
+                SUM(CASE WHEN sam.date = startDate THEN count_attendance END)
+            )::numeric / 
+            SUM(CASE WHEN sam.date = startDate THEN count_attendance END) * 100, 
+        4),0) as student_count_change_perc from
+ student_attendance.stud_avg_school sam
+join
+dimensions.class cc on sam.class = cc.class_id
+ where
+                  sam.date in ( startDate,endDate)  and cluster_id = {cluster_id}
+                GROUP BY
+                    sam.district_id, sam.district_name , block_id,block_name,cluster_id, cluster_name,school_id,school_name;`
                     },
                     "level": "school"
                 }
@@ -2819,67 +2526,55 @@ GROUP BY
                 "valueProp": "school_id",
                 "hierarchyLevel": "5",
                 "timeSeriesQueries": {
-                    "table": `SELECT
-                    sam.district_id,
-                    d.district_name,
-                    sam.block_id ,
-                    b.block_name,
-                    sam.cluster_id ,
-                    c.cluster_name,
-                    sam.school_id,
-                    sch.school_name as level,
-                 ROUND((COUNT(CASE WHEN sam.date = endDate THEN sam.attendance_status END) - COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END))::numeric / (COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END)) *100,4) AS student_count_change_perc
-                FROM
-                   student_attendance.student_attendance_master sam 
-                LEFT join
-                dimensions.district d on sam.district_id = d.district_id 
-                LEFT JOIN
-                    dimensions.class cc ON sam.class_id = cc.class_id 
-                LEFT join
-                    dimensions.block b on sam.block_id = b.block_id 
-                left join 
-                    dimensions.cluster c on sam.cluster_id = c.cluster_id
-                left join 
-                    dimensions.school sch on sam.school_id = sch.school_id 
-                where
-                  sam.date in ( startDate,endDate)  
-                  and sam.school_id  = {school_id}
+                    "table": `select 
+district_id,
+district_name,
+block_id,
+block_name,
+cluster_id,
+cluster_name,
+school_id,
+school_name as level,
+coalesce(ROUND(
+            (
+                SUM(CASE WHEN sam.date = endDate THEN count_attendance END) - 
+                SUM(CASE WHEN sam.date = startDate THEN count_attendance END)
+            )::numeric / 
+            SUM(CASE WHEN sam.date = startDate THEN count_attendance END) * 100, 
+        4),0) as student_count_change_perc from
+ student_attendance.stud_avg_school sam
+join
+dimensions.class cc on sam.class = cc.class_id
+ where
+                  sam.date in ( startDate,endDate)  and school_id = {school_id}
                 GROUP BY
-                    sam.district_id, d.district_name, sam.block_id , b.block_name ,
-                    sam.cluster_id, c.cluster_name , sam.school_id , sch.school_name 
-                `,
+                    sam.district_id, sam.district_name , block_id,block_name,cluster_id, cluster_name,school_id,school_name;`,
                 },
                 "actions": {
                     "queries": {
-                        "table":`SELECT
-                        sam.district_id,
-                        d.district_name,
-                        sam.block_id ,
-                        b.block_name,
-                        sam.cluster_id ,
-                        c.cluster_name,
-                        sam.school_id,
-                        sch.school_name as level,
-                     ROUND((COUNT(CASE WHEN sam.date = endDate THEN sam.attendance_status END) - COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END))::numeric / (COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END)) *100,4) AS student_count_change_perc
-                    FROM
-                       student_attendance.student_attendance_master sam 
-                    LEFT join
-                    dimensions.district d on sam.district_id = d.district_id 
-                    LEFT JOIN
-                        dimensions.class cc ON sam.class_id = cc.class_id 
-                    LEFT join
-                        dimensions.block b on sam.block_id = b.block_id 
-                    left join 
-                        dimensions.cluster c on sam.cluster_id = c.cluster_id
-                    left join 
-                        dimensions.school sch on sam.school_id = sch.school_id 
-                    where
-                      sam.date in ( startDate,endDate)  
-                      and sam.school_id  = {school_id}
-                    GROUP BY
-                        sam.district_id, d.district_name, sam.block_id , b.block_name ,
-                        sam.cluster_id, c.cluster_name , sam.school_id , sch.school_name 
-                    `,
+                        "table":`select 
+district_id,
+district_name,
+block_id,
+block_name,
+cluster_id,
+cluster_name,
+school_id,
+school_name as level,
+coalesce(ROUND(
+            (
+                SUM(CASE WHEN sam.date = endDate THEN count_attendance END) - 
+                SUM(CASE WHEN sam.date = startDate THEN count_attendance END)
+            )::numeric / 
+            SUM(CASE WHEN sam.date = startDate THEN count_attendance END) * 100, 
+        4),0) as student_count_change_perc from
+ student_attendance.stud_avg_school sam
+join
+dimensions.class cc on sam.class = cc.class_id
+ where
+                  sam.date in ( startDate,endDate)  and school_id = {school_id}
+                GROUP BY
+                    sam.district_id, sam.district_name , block_id,block_name,cluster_id, cluster_name,school_id,school_name;`,
                     },
                     "level": "school"
                 }
