@@ -559,39 +559,35 @@ GROUP BY
                 "valueProp": "state_id",
                 "hierarchyLevel": "1",
                 "timeSeriesQueries": {
-                    "table": `select 
+                    "table": `select
 district_id,
 district_name,
-sum_attendance as present_students,
-count_attendance as total_students,
-ROUND((sum_attendance *100) / count_attendance, 2) as perc_students
+sum(sum_attendance) as present_students,
+sum(count_attendance) as total_students,
+ROUND((sum(sum_attendance) *100) / sum(count_attendance), 2) as perc_students
 from
 student_attendance.stud_avg_dis sad  
-where 
+where
 date BETWEEN startDate AND endDate
 group by
 district_id,
-district_name,
-present_students,
-total_students`,
+district_name`,
                 },
                 "actions": {
                     "queries": {
-                        "table": `select 
+                        "table": `select
 district_id,
 district_name,
-sum_attendance as present_students,
-count_attendance as total_students,
-ROUND((sum_attendance *100) / count_attendance, 2) as perc_students
+sum(sum_attendance) as present_students,
+sum(count_attendance) as total_students,
+ROUND((sum(sum_attendance) *100) / sum(count_attendance), 2) as perc_students
 from
 student_attendance.stud_avg_dis sad  
-where 
+where
 date BETWEEN startDate AND endDate
 group by
 district_id,
-district_name,
-present_students,
-total_students`,
+district_name`,
                     },
                     "level": "district"
                 }
@@ -602,44 +598,40 @@ total_students`,
                 "valueProp": "district_id",
                 "hierarchyLevel": "2",
                 "timeSeriesQueries": {
-                    "table": `select 
+                    "table": `select
 block_id,
 block_name,
 district_id,
-sum_attendance as present_students,
-count_attendance as total_students,
-ROUND((sum_attendance *100) / count_attendance, 2) as perc_students
+sum(sum_attendance) as present_students,
+sum(count_attendance) as total_students,
+ROUND((sum(sum_attendance) *100) / sum(count_attendance), 2) as perc_students
 from
 student_attendance.stud_avg_block sad  
-where 
+where
 date BETWEEN startDate AND endDate and district_id= {district_id}
 group by
 block_id,
 block_name,
-district_id,
-present_students,
-total_students
+district_id
 `,
                 },
                 "actions": {
                     "queries": {
-                        "table": `select 
+                        "table": `select
 block_id,
 block_name,
 district_id,
-sum_attendance as present_students,
-count_attendance as total_students,
-ROUND((sum_attendance *100) / count_attendance, 2) as perc_students
+sum(sum_attendance) as present_students,
+sum(count_attendance) as total_students,
+ROUND((sum(sum_attendance) *100) / sum(count_attendance), 2) as perc_students
 from
 student_attendance.stud_avg_block sad  
-where 
+where
 date BETWEEN startDate AND endDate and district_id= {district_id}
 group by
 block_id,
 block_name,
-district_id,
-present_students,
-total_students
+district_id
 `,
                     },
                     "level": "block"
@@ -651,47 +643,43 @@ total_students
                 "valueProp": "block_id",
                 "hierarchyLevel": "3",
                 "timeSeriesQueries": {
-                    "table": `select 
- cluster_id,
- cluster_name,
+                    "table": `select
+cluster_id,
+cluster_name,
 block_id,
 district_id,
-sum_attendance as present_students,
-count_attendance as total_students,
-ROUND((sum_attendance *100) / count_attendance, 2) as perc_students
+sum(sum_attendance) as present_students,
+sum(count_attendance) as total_students,
+ROUND((sum(sum_attendance) *100) / sum(count_attendance), 2) as perc_students
 from
 student_attendance.stud_avg_cluster sac  
-where 
+where
 date BETWEEN startDate AND endDate and block_id= {block_id}
 group by
 cluster_id,
 cluster_name,
 block_id,
-district_id,
-present_students,
-total_students`,
+district_id`,
                 },
                 "actions": {
                     "queries": {
-                        "table": `select 
- cluster_id,
- cluster_name,
+                        "table": `select
+cluster_id,
+cluster_name,
 block_id,
 district_id,
-sum_attendance as present_students,
-count_attendance as total_students,
-ROUND((sum_attendance *100) / count_attendance, 2) as perc_students
+sum(sum_attendance) as present_students,
+sum(count_attendance) as total_students,
+ROUND((sum(sum_attendance) *100) / sum(count_attendance), 2) as perc_students
 from
 student_attendance.stud_avg_cluster sac  
-where 
+where
 date BETWEEN startDate AND endDate and block_id= {block_id}
 group by
 cluster_id,
 cluster_name,
 block_id,
-district_id,
-present_students,
-total_students`,
+district_id`,
                     },
                     "level": "cluster"
                 }
@@ -702,51 +690,47 @@ total_students`,
                 "valueProp": "cluster_id",
                 "hierarchyLevel": "4",
                 "timeSeriesQueries": {
-                    "table": `select 
- school_id,
- school_name,
- cluster_id,
+                    "table": `select
+school_id,
+school_name,
+cluster_id,
 block_id,
 district_id,
-sum_attendance as present_students,
-count_attendance as total_students,
-ROUND((sum_attendance *100) / count_attendance, 2) as perc_students
+sum(sum_attendance) as present_students,
+sum(count_attendance) as total_students,
+ROUND((sum(sum_attendance) *100) / sum(count_attendance), 2) as perc_students
 from
 student_attendance.stud_avg_school sas  
-where 
+where
 date BETWEEN startDate AND endDate and cluster_id= {cluster_id}
 group by
 school_id,
 school_name,
 cluster_id,
 block_id,
-district_id,
-present_students,
-total_students`
+district_id;`
                 },
                 "actions": {
                     "queries": {
-                        "table": `select 
- school_id,
- school_name,
- cluster_id,
+                        "table": `select
+school_id,
+school_name,
+cluster_id,
 block_id,
 district_id,
-sum_attendance as present_students,
-count_attendance as total_students,
-ROUND((sum_attendance *100) / count_attendance, 2) as perc_students
+sum(sum_attendance) as present_students,
+sum(count_attendance) as total_students,
+ROUND((sum(sum_attendance) *100) / sum(count_attendance), 2) as perc_students
 from
 student_attendance.stud_avg_school sas  
-where 
+where
 date BETWEEN startDate AND endDate and cluster_id= {cluster_id}
 group by
 school_id,
 school_name,
 cluster_id,
 block_id,
-district_id,
-present_students,
-total_students`,
+district_id;`,
                     },
                     "level": "school"
                 }
@@ -894,41 +878,37 @@ student_average_bignumber: {
                 "hierarchyLevel": "1",
                 "timeSeriesQueries": {
                     "bigNumber": `select ROUND(AVG(perc_students)) AS percentage_students
-from (select 
+from ( select
 district_id,
 district_name,
-sum_attendance as present_students,
-count_attendance as total_students,
-ROUND((sum_attendance *100) / count_attendance, 2) as perc_students
+sum(sum_attendance) as present_students,
+sum(count_attendance) as total_students,
+ROUND((sum(sum_attendance) *100) / sum(count_attendance), 2) as perc_students
 from
 student_attendance.stud_avg_dis sad  
-where 
+where
 date BETWEEN startDate AND endDate
 group by
 district_id,
-district_name,
-present_students,
-total_students) AS avg_query;`
+district_name ) AS avg_query;`
 
                 },
                 "actions": {
                     "queries": {
                         "bigNumber": `select ROUND(AVG(perc_students)) AS percentage_students
-from (select 
+from ( select
 district_id,
 district_name,
-sum_attendance as present_students,
-count_attendance as total_students,
-ROUND((sum_attendance *100) / count_attendance, 2) as perc_students
+sum(sum_attendance) as present_students,
+sum(count_attendance) as total_students,
+ROUND((sum(sum_attendance) *100) / sum(count_attendance), 2) as perc_students
 from
 student_attendance.stud_avg_dis sad  
-where 
+where
 date BETWEEN startDate AND endDate
 group by
 district_id,
-district_name,
-present_students,
-total_students) AS avg_query;`
+district_name ) AS avg_query;`
                     },
                     "level": "district"
                 }
@@ -940,40 +920,36 @@ total_students) AS avg_query;`
                 "hierarchyLevel": "2",
                 "timeSeriesQueries": {
                     "bigNumber": `select ROUND(AVG(perc_students)) AS percentage_students
-from (select 
+from ( select
 district_id,
 district_name,
-sum_attendance as present_students,
-count_attendance as total_students,
-ROUND((sum_attendance *100) / count_attendance, 2) as perc_students
+sum(sum_attendance) as present_students,
+sum(count_attendance) as total_students,
+ROUND((sum(sum_attendance) *100) / sum(count_attendance), 2) as perc_students
 from
 student_attendance.stud_avg_dis sad  
-where 
-date BETWEEN startDate AND endDate and district_id = {district_id}
+where
+date BETWEEN startDate AND endDate and district_id= {district_id}
 group by
 district_id,
-district_name,
-present_students,
-total_students) AS avg_query;`
+district_name ) AS avg_query;`
                 },
                 "actions": {
                     "queries": {
                         "bigNumber": `select ROUND(AVG(perc_students)) AS percentage_students
-from (select 
+from ( select
 district_id,
 district_name,
-sum_attendance as present_students,
-count_attendance as total_students,
-ROUND((sum_attendance *100) / count_attendance, 2) as perc_students
+sum(sum_attendance) as present_students,
+sum(count_attendance) as total_students,
+ROUND((sum(sum_attendance) *100) / sum(count_attendance), 2) as perc_students
 from
 student_attendance.stud_avg_dis sad  
-where 
-date BETWEEN startDate AND endDate and district_id = {district_id}
+where
+date BETWEEN startDate AND endDate and district_id= {district_id}
 group by
 district_id,
-district_name,
-present_students,
-total_students) AS avg_query;`
+district_name ) AS avg_query;`
                     },
                     "level": "block"
                 }
@@ -985,49 +961,41 @@ total_students) AS avg_query;`
                 "hierarchyLevel": "3",
                 "timeSeriesQueries": {
                     "bigNumber": `select ROUND(AVG(perc_students)) AS percentage_students
-from (select 
+from ( select
 block_id,
 block_name,
 district_id,
-district_name,
-sum_attendance as present_students,
-count_attendance as total_students,
-ROUND((sum_attendance *100) / count_attendance, 2) as perc_students
+sum(sum_attendance) as present_students,
+sum(count_attendance) as total_students,
+ROUND((sum(sum_attendance) *100) / sum(count_attendance), 2) as perc_students
 from
 student_attendance.stud_avg_block sad  
-where 
-date BETWEEN startDate AND endDate and block_id = {block_id}
+where
+date BETWEEN startDate AND endDate and block_id= {block_id}
 group by
 block_id,
 block_name,
-district_id,
-district_name,
-present_students,
-total_students) as avg_query;`,
+district_id ) AS avg_query;`,
                     
                 },
                 "actions": {
                     "queries": {
                         "bigNumber": `select ROUND(AVG(perc_students)) AS percentage_students
-from (select 
+from ( select
 block_id,
 block_name,
 district_id,
-district_name,
-sum_attendance as present_students,
-count_attendance as total_students,
-ROUND((sum_attendance *100) / count_attendance, 2) as perc_students
+sum(sum_attendance) as present_students,
+sum(count_attendance) as total_students,
+ROUND((sum(sum_attendance) *100) / sum(count_attendance), 2) as perc_students
 from
 student_attendance.stud_avg_block sad  
-where 
-date BETWEEN startDate AND endDate and block_id = {block_id}
+where
+date BETWEEN startDate AND endDate and block_id= {block_id}
 group by
 block_id,
 block_name,
-district_id,
-district_name,
-present_students,
-total_students) as avg_query;`,
+district_id ) AS avg_query;`,
                        
                     },
                     "level": "cluster"
@@ -1040,57 +1008,45 @@ total_students) as avg_query;`,
                 "hierarchyLevel": "4",
                 "timeSeriesQueries": {
                     "bigNumber": `select ROUND(AVG(perc_students)) AS percentage_students
-from (select 
+from (select
 cluster_id,
 cluster_name,
 block_id,
-block_name,
 district_id,
-district_name,
-sum_attendance as present_students,
-count_attendance as total_students,
-ROUND((sum_attendance *100) / count_attendance, 2) as perc_students
+sum(sum_attendance) as present_students,
+sum(count_attendance) as total_students,
+ROUND((sum(sum_attendance) *100) / sum(count_attendance), 2) as perc_students
 from
-student_attendance.stud_avg_cluster sac 
-where 
-date BETWEEN startDate AND endDate and cluster_id = {cluster_id}
+student_attendance.stud_avg_cluster sac  
+where
+date BETWEEN startDate AND endDate and cluster_id= {cluster_id}
 group by
 cluster_id,
 cluster_name,
 block_id,
-block_name,
-district_id,
-district_name,
-present_students,
-total_students) as avg_query;`,
+district_id) AS avg_query;`,
                    
                 },
                 "actions": {
                     "queries": {
                         "bigNumber": `select ROUND(AVG(perc_students)) AS percentage_students
-from (select 
+from (select
 cluster_id,
 cluster_name,
 block_id,
-block_name,
 district_id,
-district_name,
-sum_attendance as present_students,
-count_attendance as total_students,
-ROUND((sum_attendance *100) / count_attendance, 2) as perc_students
+sum(sum_attendance) as present_students,
+sum(count_attendance) as total_students,
+ROUND((sum(sum_attendance) *100) / sum(count_attendance), 2) as perc_students
 from
-student_attendance.stud_avg_cluster sac 
-where 
-date BETWEEN startDate AND endDate and cluster_id = {cluster_id}
+student_attendance.stud_avg_cluster sac  
+where
+date BETWEEN startDate AND endDate and cluster_id= {cluster_id}
 group by
 cluster_id,
 cluster_name,
 block_id,
-block_name,
-district_id,
-district_name,
-present_students,
-total_students) as avg_query`,
+district_id) AS avg_query;`,
                         
                     },
                     "level": "school"
