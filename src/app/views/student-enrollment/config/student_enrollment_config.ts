@@ -84,7 +84,6 @@ export const config = {
    
 
     ///right table for comparative
-    // update on sheet not done --need
     student_comparative_table: {
         "label": "Comparative Data",
         "defaultLevel": "state",
@@ -95,7 +94,6 @@ export const config = {
                 "valueProp": "state_id",
                 "hierarchyLevel": "1",
                 "timeSeriesQueries": {
-<<<<<<< HEAD
                     "table": `SELECT
                     district_id,
                     district_name,
@@ -175,117 +173,6 @@ GROUP BY
                     district_id,
                     district_name;
                     `,
-=======
-                    "table": `SELECT 
-  district_id, 
-  district_name, 
-  SUM(date1_count) AS total_date1_count, 
-  SUM(date2_count) AS total_date2_count, 
-  SUM(enrolled) AS enrolled, 
-  SUM(deenrolled) AS total_deenrolled 
-FROM 
-  (
-    SELECT 
-      district_id, 
-      district_name, 
-      date1_count, 
-      date2_count, 
-      SUM(
-        CASE WHEN student_count_change < 0 THEN 0 ELSE student_count_change END
-      ) AS enrolled, 
-      SUM(
-        CASE WHEN student_count_change < 0 THEN ABS(student_count_change) ELSE 0 END
-      ) AS deenrolled 
-    FROM 
-      (
-        SELECT 
-          sam.district_id, 
-          sam.district_name, 
-          SUM(
-            CASE WHEN sam.date = startDate THEN sam.count_attendance END
-          ) AS date1_count, 
-          SUM(
-            CASE WHEN sam.date = endDate THEN sam.count_attendance END
-          ) AS date2_count, 
-          SUM(
-            CASE WHEN sam.date = endDate THEN sam.count_attendance ELSE 0 END
-          ) - SUM(
-            CASE WHEN sam.date = startDate THEN sam.count_attendance ELSE 0 END
-          ) AS student_count_change 
-        FROM 
-          student_attendance.stud_avg_school sam 
-        WHERE 
-          sam.date IN (startDate, endDate) 
-        GROUP BY 
-          sam.district_id, 
-          sam.district_name
-      ) AS subquery 
-    GROUP BY 
-      district_id, 
-      district_name, 
-      date1_count, 
-      date2_count
-  ) AS state_query 
-GROUP BY 
-  district_id, 
-  district_name;`,
-                },
-                "actions": {
-                    "queries": {
-                        "table": `SELECT 
-  district_id, 
-  district_name, 
-  SUM(date1_count) AS total_date1_count, 
-  SUM(date2_count) AS total_date2_count, 
-  SUM(enrolled) AS enrolled, 
-  SUM(deenrolled) AS total_deenrolled 
-FROM 
-  (
-    SELECT 
-      district_id, 
-      district_name, 
-      date1_count, 
-      date2_count, 
-      SUM(
-        CASE WHEN student_count_change < 0 THEN 0 ELSE student_count_change END
-      ) AS enrolled, 
-      SUM(
-        CASE WHEN student_count_change < 0 THEN ABS(student_count_change) ELSE 0 END
-      ) AS deenrolled 
-    FROM 
-      (
-        SELECT 
-          sam.district_id, 
-          sam.district_name, 
-          SUM(
-            CASE WHEN sam.date = startDate THEN sam.count_attendance END
-          ) AS date1_count, 
-          SUM(
-            CASE WHEN sam.date = endDate THEN sam.count_attendance END
-          ) AS date2_count, 
-          SUM(
-            CASE WHEN sam.date = endDate THEN sam.count_attendance ELSE 0 END
-          ) - SUM(
-            CASE WHEN sam.date = startDate THEN sam.count_attendance ELSE 0 END
-          ) AS student_count_change 
-        FROM 
-          student_attendance.stud_avg_school sam 
-        WHERE 
-          sam.date IN (startDate, endDate) 
-        GROUP BY 
-          sam.district_id, 
-          sam.district_name
-      ) AS subquery 
-    GROUP BY 
-      district_id, 
-      district_name, 
-      date1_count, 
-      date2_count
-  ) AS state_query 
-GROUP BY 
-  district_id, 
-  district_name;`,
->>>>>>> a8a7ed8bd961d778a0e7e2a812f4192ef9b3143c
                     },
                     "level": "district"
                 }
@@ -887,7 +774,6 @@ GROUP BY
 
 
 //left table for bignumber
-// update on sheet not done --need
 student_comparative_bignumber: {
         "label": "Average Student Present",
         "filters": [
@@ -1352,7 +1238,6 @@ GROUP BY
             }
         }
     },
-    // update on sheet not done --need
     student_denroll_bignumber: {
         "label": "Average Student Present",
         "filters": [
@@ -1818,7 +1703,7 @@ GROUP BY
         }
     },
 
-    //percentage change big number--need
+    //percentage change big number
     student_percentage_change_bignumber: {
         "label": "Average Student Present",
         "filters": [
@@ -2058,7 +1943,6 @@ dimensions.class cc on sam.class = cc.class_id
     },
 
     //bottom table for all data
-    // update on sheet not done --need
     student_comparative_school: {
         "label": "Average Student Present",
         "defaultLevel": "state",
@@ -2417,8 +2301,7 @@ dimensions.class cc on sam.class = cc.class_id
         }
     },
 
-    //barchart--need
-    // update on sheet not done
+    //barchart
     student_comparative_barchart:{
         "label": "Overall Summary",
         "defaultLevel": "state",
@@ -2782,7 +2665,318 @@ dimensions.class cc on sam.class = cc.class_id
         }
     },
 
+    //try pie chart
+    // student_comparative_barchart:{
+    //     "label": "Overall Summary",
+    //     "defaultLevel": "state",
+    //     "filters": [
+    //         {
+    //             "name": "State",
+    //             "labelProp": "state_name",
+    //             "valueProp": "state_id",
+    //             "hierarchyLevel": "1",
+    //             "timeSeriesQueries": {
+    //                 "barChart": `SELECT
+    //                 sam.district_id,
+    //                 d.district_name as level,
+    //                ROUND((COUNT(CASE WHEN sam.date = endDate THEN sam.attendance_status END) - COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END))::numeric / (COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END)) *100, 4) AS student_count_change_perc
+    //             FROM
+    //                student_attendance.student_attendance_master sam 
+    //             LEFT join
+    //             dimensions.district d on sam.district_id = d.district_id 
+    //             LEFT JOIN
+    //                 dimensions.class cc ON sam.class_id = cc.class_id 
+    //             where
+    //               sam.date in ( startDate,endDate)  
+    //             GROUP BY
+    //                 sam.district_id, d.district_name
+    //                 `,
+    //             },
+    //             "actions": {
+    //                 "queries": {
+    //                     "barChart":`SELECT
+    //                     sam.district_id,
+    //                     d.district_name as level,
+    //                    ROUND((COUNT(CASE WHEN sam.date = endDate THEN sam.attendance_status END) - COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END))::numeric / (COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END)) *100, 4) AS student_count_change_perc
+    //                 FROM
+    //                    student_attendance.student_attendance_master sam 
+    //                 LEFT join
+    //                 dimensions.district d on sam.district_id = d.district_id 
+    //                 LEFT JOIN
+    //                     dimensions.class cc ON sam.class_id = cc.class_id 
+    //                 where
+    //                   sam.date in ( startDate,endDate)  
+    //                 GROUP BY
+    //                     sam.district_id, d.district_name
+    //                     `
+                    
+    //                 },
+    //                 "level": "district"
+    //             }
+    //         },
+    //         {
+    //             "name": "District",
+    //             "labelProp": "district_name",
+    //             "valueProp": "district_id",
+    //             "hierarchyLevel": "2",
+    //             "timeSeriesQueries": {
+    //                 "barChart": `SELECT
+    //                 sam.district_id,
+    //                 d.district_name,
+    //                 sam.block_id ,
+    //                 b.block_name as level,
+    //             ROUND((COUNT(CASE WHEN sam.date = endDate THEN sam.attendance_status END) - COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END))::numeric / (COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END)) *100, 4) AS student_count_change_perc
+    //             FROM
+    //                student_attendance.student_attendance_master sam 
+    //             LEFT join
+    //             dimensions.district d on sam.district_id = d.district_id 
+    //             LEFT JOIN
+    //                 dimensions.class cc ON sam.class_id = cc.class_id 
+    //             LEFT join
+    //                 dimensions.block b on sam.block_id = b.block_id 
+    //             where
+    //               sam.date in ( startDate,endDate)  
+    //               and sam.district_id = {district_id}
+    //             GROUP BY
+    //                 sam.district_id, d.district_name, sam.block_id , b.block_name `,
+    //             },
+    //             "actions": {
+    //                 "queries": {
+    //                     "barChart":
+    //                     `SELECT
+    //                     sam.district_id,
+    //                     d.district_name,
+    //                     sam.block_id ,
+    //                     b.block_name as level,
+    //                 ROUND((COUNT(CASE WHEN sam.date = endDate THEN sam.attendance_status END) - COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END))::numeric / (COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END)) *100, 4) AS student_count_change_perc
+    //                 FROM
+    //                    student_attendance.student_attendance_master sam 
+    //                 LEFT join
+    //                 dimensions.district d on sam.district_id = d.district_id 
+    //                 LEFT JOIN
+    //                     dimensions.class cc ON sam.class_id = cc.class_id 
+    //                 LEFT join
+    //                     dimensions.block b on sam.block_id = b.block_id 
+    //                 where
+    //                   sam.date in ( startDate,endDate)  
+    //                   and sam.district_id = {district_id}
+    //                 GROUP BY
+    //                     sam.district_id, d.district_name, sam.block_id , b.block_name `,
+    //                 },
+    //                 "level": "block"
+    //             }
+    //         },
+    //         {
+    //             "name": "Block",
+    //             "labelProp": "block_name",
+    //             "valueProp": "block_id",
+    //             "hierarchyLevel": "3",
+    //             "timeSeriesQueries": {
+    //                 "barChart": `SELECT
+    //                 sam.district_id,
+    //                 d.district_name,
+    //                 sam.block_id ,
+    //                 b.block_name,
+    //                 sam.cluster_id ,
+    //                 c.cluster_name as level,
+    //             ROUND((COUNT(CASE WHEN sam.date = endDate THEN sam.attendance_status END) - COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END))::numeric / (COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END)) *100,4) AS student_count_change_perc
+    //             FROM
+    //                student_attendance.student_attendance_master sam 
+    //             LEFT join
+    //             dimensions.district d on sam.district_id = d.district_id 
+    //             LEFT JOIN
+    //                 dimensions.class cc ON sam.class_id = cc.class_id 
+    //             LEFT join
+    //                 dimensions.block b on sam.block_id = b.block_id 
+    //             left join 
+    //                 dimensions.cluster c on sam.cluster_id = c.cluster_id
+    //             where
+    //               sam.date in ( startDate,endDate)  
+    //               and sam.block_id  = {block_id}
+    //             GROUP BY
+    //                 sam.district_id, d.district_name, sam.block_id , b.block_name ,
+    //                 sam.cluster_id, c.cluster_name `,
+    //             },
+    //             "actions": {
+    //                 "queries": {
+    //                     "barChart":`SELECT
+    //                     sam.district_id,
+    //                     d.district_name,
+    //                     sam.block_id ,
+    //                     b.block_name,
+    //                     sam.cluster_id ,
+    //                     c.cluster_name as level,
+    //                 ROUND((COUNT(CASE WHEN sam.date = endDate THEN sam.attendance_status END) - COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END))::numeric / (COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END)) *100,4) AS student_count_change_perc
+    //                 FROM
+    //                    student_attendance.student_attendance_master sam 
+    //                 LEFT join
+    //                 dimensions.district d on sam.district_id = d.district_id 
+    //                 LEFT JOIN
+    //                     dimensions.class cc ON sam.class_id = cc.class_id 
+    //                 LEFT join
+    //                     dimensions.block b on sam.block_id = b.block_id 
+    //                 left join 
+    //                     dimensions.cluster c on sam.cluster_id = c.cluster_id
+    //                 where
+    //                   sam.date in ( startDate,endDate)  
+    //                   and sam.block_id  = {block_id}
+    //                 GROUP BY
+    //                     sam.district_id, d.district_name, sam.block_id , b.block_name ,
+    //                     sam.cluster_id, c.cluster_name `
+    //                 },
+    //                 "level": "cluster"
+    //             }
+    //         },
+    //         {
+    //             "name": "Cluster",
+    //             "labelProp": "cluster_name",
+    //             "valueProp": "cluster_id",
+    //             "hierarchyLevel": "4",
+    //             "timeSeriesQueries": {
+    //                 "barChart": `SELECT
+    //                 sam.district_id,
+    //                 d.district_name,
+    //                 sam.block_id ,
+    //                 b.block_name,
+    //                 sam.cluster_id ,
+    //                 c.cluster_name,
+    //                 sam.school_id,
+    //                 sch.school_name as level,
+    //              ROUND((COUNT(CASE WHEN sam.date = endDate THEN sam.attendance_status END) - COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END))::numeric / (COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END)) *100,4) AS student_count_change_perc
+    //             FROM
+    //                student_attendance.student_attendance_master sam 
+    //             LEFT join
+    //             dimensions.district d on sam.district_id = d.district_id 
+    //             LEFT JOIN
+    //                 dimensions.class cc ON sam.class_id = cc.class_id 
+    //             LEFT join
+    //                 dimensions.block b on sam.block_id = b.block_id 
+    //             left join 
+    //                 dimensions.cluster c on sam.cluster_id = c.cluster_id
+    //             left join 
+    //                 dimensions.school sch on sam.school_id = sch.school_id 
+    //             where
+    //               sam.date in ( startDate,endDate)  
+    //               and sam.cluster_id  = {cluster_id}
+    //             GROUP BY
+    //                 sam.district_id, d.district_name, sam.block_id , b.block_name ,
+    //                 sam.cluster_id, c.cluster_name , sam.school_id , sch.school_name 
+                
+    //             `,
+    //             },
+    //             "actions": {
+    //                 "queries": {
+    //                     "barChart":`SELECT
+    //                     sam.district_id,
+    //                     d.district_name,
+    //                     sam.block_id ,
+    //                     b.block_name,
+    //                     sam.cluster_id ,
+    //                     c.cluster_name,
+    //                     sam.school_id,
+    //                     sch.school_name as level,
+    //                  ROUND((COUNT(CASE WHEN sam.date = endDate THEN sam.attendance_status END) - COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END))::numeric / (COUNT(CASE WHEN sam.date = startDate THEN sam.attendance_status END)) *100,4) AS student_count_change_perc
+    //                 FROM
+    //                    student_attendance.student_attendance_master sam 
+    //                 LEFT join
+    //                 dimensions.district d on sam.district_id = d.district_id 
+    //                 LEFT JOIN
+    //                     dimensions.class cc ON sam.class_id = cc.class_id 
+    //                 LEFT join
+    //                     dimensions.block b on sam.block_id = b.block_id 
+    //                 left join 
+    //                     dimensions.cluster c on sam.cluster_id = c.cluster_id
+    //                 left join 
+    //                     dimensions.school sch on sam.school_id = sch.school_id 
+    //                 where
+    //                   sam.date in ( startDate,endDate)  
+    //                   and sam.cluster_id  = {cluster_id}
+    //                 GROUP BY
+    //                     sam.district_id, d.district_name, sam.block_id , b.block_name ,
+    //                     sam.cluster_id, c.cluster_name , sam.school_id , sch.school_name 
+                    
+    //                 `
+    //                 },
+    //                 "level": "school"
+    //             }
+    //         },
+    
+    //     ],
+    //     "options": {
+    //         "barChart": {
+    //             "metricLabelProp": "Percentage of change",
+    //             "metricValueProp": "student_count_change_perc",
+    //             "xAxis": {
+    //                 "title": "Percentage of change",
+    //                 "label": "level",
+    //                 "value": "level"
+    //             },
+    //             "tooltipMetrics": [
+    //                 {
+    //                     "valuePrefix": "District Id: ",
+    //                     "value": "district_id",
+    //                     "valueSuffix": ""
+    //                 },
+    //                 {
+    //                     "valuePrefix": "District Name: ",
+    //                     "value": "district_name",
+    //                     "valueSuffix": "%"
+    //                 },
+    //                 {
+    //                     "valuePrefix": "Block Id: ",
+    //                     "value": "block_id",
+    //                     "valueSuffix": ""
+    //                 },
+    //                 {
+    //                     "valuePrefix": "Block Name: ",
+    //                     "value": "block_name",
+    //                     "valueSuffix": ""
+    //                 },
+    //                 {
+    //                     "valuePrefix": "Cluster Id: ",
+    //                     "value": "cluster_id",
+    //                     "valueSuffix": ""
+    //                 },
+    //                 {
+    //                     "valuePrefix": "Cluster Name: ",
+    //                     "value": "cluster_name",
+    //                     "valueSuffix": ""
+    //                 },
+    //                 {
+    //                     "valuePrefix": "School Id: ",
+    //                     "value": "school_id",
+    //                     "valueSuffix": ""
+    //                 },
+    //                 {
+    //                     "valuePrefix": "Present Students ",
+    //                     "value": "present_students",
+    //                     "valueSuffix": ""
+    //                 },
+    //                 {
+    //                     "valuePrefix": "Present Students ",
+    //                     "value": "total_students",
+    //                     "valueSuffix": ""
+    //                 },
+    //                 {
+    //                     "valuePrefix": "School Name: ",
+    //                     "value": "school_name",
+    //                     "valueSuffix": ""
+    //                 },
+    //                 {
+    //                     "valuePrefix": "Average Percentage Student: ",
+    //                     "value": "perc_students",
+    //                     "valueSuffix": ""
+    //                 }
+    //             ]
+    //         }
+    //     }
+        
+    // },
 
+    //
+   
+
+//pat bignumber1
 
 student_attendance_bignumber1: {
     "label": "Total Enrolled Students",
