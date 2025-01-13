@@ -11,7 +11,7 @@ export class SbBarChartComponent implements OnInit, OnChanges {
   @Input() data: any;
   @Input() config: any;
   @Input() type: any = 'bar';
-  @Input() pageSize: number = 10; // Default pageSize
+  @Input() pageSize: number = 5; // Default pageSize
   // @Input() type: any = 'horizontalBar';
 
   filterData: any;

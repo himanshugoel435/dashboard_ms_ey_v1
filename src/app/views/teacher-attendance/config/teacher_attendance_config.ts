@@ -3953,51 +3953,38 @@ GROUP BY
                 "hierarchyLevel": "2",
                 "timeSeriesQueries": {
                     "barChart": `select
-                    ts.district_id ,
-                    d.district_name,
-                    ts.block_id ,
-                    b.block_name,
                     TO_CHAR(ts.date, 'YYYY-MM-DD') AS level,
                     coalesce(sum(ts.attendance_status),0) as staff_present
                     from
-                    teacher_attendance.teaching_staff ts 
-                    left join 
-                    dimensions.district d on ts.district_id = d.district_id 
-                    left join 
-                    dimensions.block b on ts.block_id = b.block_id 
-                    where 
-                    ts.date between startDate and endDate and  ts.district_id = {district_id}
-                    group by 
-                    TO_CHAR(ts.date, 'YYYY-MM-DD')  ,ts.district_id ,ts.block_id ,
-                    b.block_name,
-                    d.district_name
+                    teacher_attendance.teaching_staff ts  
+                    left join
+                    dimensions.district d on ts.district_id  = d.district_id
+                   left join
+                   dimensions.block b on ts.block_id = b.block_id 
+                    where
+                    ts.date between startDate AND endDate and ts.district_id = {district_id}
+                    group by
+                    TO_CHAR(ts.date, 'YYYY-MM-DD')
                     ORDER BY
-                    TO_CHAR(ts.date, 'YYYY-MM-DD') `,
+                    TO_CHAR(ts.date, 'YYYY-MM-DD')`,
                 },
                 "actions": {
                     "queries": {
-                        "barChart":
-                        `select
-                        ts.district_id ,
-                        d.district_name,
-                        ts.block_id ,
-                        b.block_name,
-                        TO_CHAR(ts.date, 'YYYY-MM-DD') AS level,
-                        coalesce(sum(ts.attendance_status),0) as staff_present
-                        from
-                        teacher_attendance.teaching_staff ts 
-                        left join 
-                        dimensions.district d on ts.district_id = d.district_id 
-                        left join 
-                        dimensions.block b on ts.block_id = b.block_id 
-                        where 
-                        ts.date between startDate and endDate and  ts.district_id = {district_id}
-                        group by 
-                        TO_CHAR(ts.date, 'YYYY-MM-DD')  ,ts.district_id ,ts.block_id ,
-                        b.block_name,
-                        d.district_name
-                        ORDER BY
-                        TO_CHAR(ts.date, 'YYYY-MM-DD')`,
+                        "barChart":`select
+                    TO_CHAR(ts.date, 'YYYY-MM-DD') AS level,
+                    coalesce(sum(ts.attendance_status),0) as staff_present
+                    from
+                    teacher_attendance.teaching_staff ts  
+                    left join
+                    dimensions.district d on ts.district_id  = d.district_id
+                   left join
+                   dimensions.block b on ts.block_id = b.block_id 
+                    where
+                    ts.date between startDate AND endDate and ts.district_id = {district_id}
+                    group by
+                    TO_CHAR(ts.date, 'YYYY-MM-DD')
+                    ORDER BY
+                    TO_CHAR(ts.date, 'YYYY-MM-DD')`,
                     },
                     "level": "block"
                 }
@@ -4009,60 +3996,42 @@ GROUP BY
                 "hierarchyLevel": "3",
                 "timeSeriesQueries": {
                     "barChart": `select
-                    ts.district_id ,
-                    d.district_name,
-                    ts.block_id ,
-                    b.block_name,
-                    ts.cluster_id,
-                    c.cluster_name,
                     TO_CHAR(ts.date, 'YYYY-MM-DD') AS level,
                     coalesce(sum(ts.attendance_status),0) as staff_present
                     from
-                    teacher_attendance.teaching_staff ts 
-                    left join 
-                    dimensions.district d on ts.district_id = d.district_id 
-                    left join 
-                    dimensions.block b on ts.block_id = b.block_id 
-                    left join 
-                    dimensions.cluster c on ts.cluster_id  = c.cluster_id  
-                    where 
-                    ts.date between startDate and endDate and ts.block_id = {block_id}
-                    group by 
-                    TO_CHAR(ts.date, 'YYYY-MM-DD') ,ts.district_id ,ts.block_id ,
-                    b.block_name,ts.cluster_id ,c.cluster_name,
-                    d.district_name
+                    teacher_attendance.teaching_staff ts  
+                    left join
+                    dimensions.district d on ts.district_id  = d.district_id
+                    left join
+                        dimensions.block b on ts.block_id = b.block_id
+                    left join
+                    dimensions.cluster c on ts.cluster_id  = c.cluster_id
+                    where
+                    ts.date between startDate AND endDate and ts.block_id = {block_id}
+                    group by
+                    TO_CHAR(ts.date, 'YYYY-MM-DD')
                     ORDER BY
-                    TO_CHAR(ts.date, 'YYYY-MM-DD') 
-                    `,
+                    TO_CHAR(ts.date, 'YYYY-MM-DD') `,
                 },
                 "actions": {
                     "queries": {
                         "barChart":`select
-                        ts.district_id ,
-                        d.district_name,
-                        ts.block_id ,
-                        b.block_name,
-                        ts.cluster_id,
-                        c.cluster_name,
-                        TO_CHAR(ts.date, 'YYYY-MM-DD') AS level,
-                        coalesce(sum(ts.attendance_status),0) as staff_present
-                        from
-                        teacher_attendance.teaching_staff ts 
-                        left join 
-                        dimensions.district d on ts.district_id = d.district_id 
-                        left join 
-                        dimensions.block b on ts.block_id = b.block_id 
-                        left join 
-                        dimensions.cluster c on ts.cluster_id  = c.cluster_id  
-                        where 
-                        ts.date between startDate and endDate and ts.block_id = {block_id}
-                        group by 
-                        TO_CHAR(ts.date, 'YYYY-MM-DD') ,ts.district_id ,ts.block_id ,
-                        b.block_name,ts.cluster_id ,c.cluster_name,
-                        d.district_name
-                        ORDER BY
-                        TO_CHAR(ts.date, 'YYYY-MM-DD') 
-                        `
+                    TO_CHAR(ts.date, 'YYYY-MM-DD') AS level,
+                    coalesce(sum(ts.attendance_status),0) as staff_present
+                    from
+                    teacher_attendance.teaching_staff ts  
+                    left join
+                    dimensions.district d on ts.district_id  = d.district_id
+                    left join
+                        dimensions.block b on ts.block_id = b.block_id
+                    left join
+                    dimensions.cluster c on ts.cluster_id  = c.cluster_id
+                    where
+                    ts.date between startDate AND endDate and ts.block_id = {block_id}
+                    group by
+                    TO_CHAR(ts.date, 'YYYY-MM-DD')
+                    ORDER BY
+                    TO_CHAR(ts.date, 'YYYY-MM-DD') `
                     },
                     "level": "cluster"
                 }
@@ -4074,70 +4043,46 @@ GROUP BY
                 "hierarchyLevel": "4",
                 "timeSeriesQueries": {
                     "barChart": `select
-                    ts.district_id ,
-                    d.district_name,
-                    ts.block_id ,
-                    b.block_name,
-                    ts.cluster_id,
-                    c.cluster_name,
-                    ts.school_id ,
-                    sch.school_name,
                     TO_CHAR(ts.date, 'YYYY-MM-DD') AS level,
                     coalesce(sum(ts.attendance_status),0) as staff_present
                     from
-                    teacher_attendance.teaching_staff ts 
-                    left join 
-                    dimensions.district d on ts.district_id = d.district_id 
-                    left join 
-                    dimensions.block b on ts.block_id = b.block_id 
-                    left join 
-                    dimensions.cluster c on ts.cluster_id  = c.cluster_id  
-                    left join 
-                    dimensions.school sch on ts.school_id = sch.school_id 
-                    where 
-                    ts.date between startDate and endDate and ts.cluster_id = {cluster_id}
-                    group by 
-                    TO_CHAR(ts.date, 'YYYY-MM-DD') ,ts.district_id ,ts.block_id ,
-                    b.block_name,ts.cluster_id ,c.cluster_name,
-                    d.district_name,ts.school_id ,
-                    sch.school_name
+                    teacher_attendance.teaching_staff ts  
+                    left join
+                    dimensions.district d on ts.district_id  = d.district_id
+                    left join
+                        dimensions.block b on ts.block_id = b.block_id
+                    left join
+                    dimensions.cluster c on ts.cluster_id  = c.cluster_id
+                    left join
+                    dimensions.school sch on ts.school_id = sch.school_id
+                    where
+                    ts.date between startDate AND endDate and ts.cluster_id = {cluster_id}
+                    group by
+                    TO_CHAR(ts.date, 'YYYY-MM-DD')
                     ORDER BY
-                    TO_CHAR(ts.date, 'YYYY-MM-DD') 
-                    `,
+                    TO_CHAR(ts.date, 'YYYY-MM-DD')`,
                 },
                 "actions": {
                     "queries": {
                         "barChart":`select
-                        ts.district_id ,
-                        d.district_name,
-                        ts.block_id ,
-                        b.block_name,
-                        ts.cluster_id,
-                        c.cluster_name,
-                        ts.school_id ,
-                        sch.school_name,
-                        TO_CHAR(ts.date, 'YYYY-MM-DD') AS level,
-                        coalesce(sum(ts.attendance_status),0) as staff_present
-                        from
-                        teacher_attendance.teaching_staff ts 
-                        left join 
-                        dimensions.district d on ts.district_id = d.district_id 
-                        left join 
-                        dimensions.block b on ts.block_id = b.block_id 
-                        left join 
-                        dimensions.cluster c on ts.cluster_id  = c.cluster_id  
-                        left join 
-                        dimensions.school sch on ts.school_id = sch.school_id 
-                        where 
-                        ts.date between startDate and endDate and ts.cluster_id = {cluster_id}
-                        group by 
-                        TO_CHAR(ts.date, 'YYYY-MM-DD') ,ts.district_id ,ts.block_id ,
-                        b.block_name,ts.cluster_id ,c.cluster_name,
-                        d.district_name,ts.school_id ,
-                        sch.school_name
-                        ORDER BY
-                        TO_CHAR(ts.date, 'YYYY-MM-DD') 
-                        `
+                    TO_CHAR(ts.date, 'YYYY-MM-DD') AS level,
+                    coalesce(sum(ts.attendance_status),0) as staff_present
+                    from
+                    teacher_attendance.teaching_staff ts  
+                    left join
+                    dimensions.district d on ts.district_id  = d.district_id
+                    left join
+                        dimensions.block b on ts.block_id = b.block_id
+                    left join
+                    dimensions.cluster c on ts.cluster_id  = c.cluster_id
+                    left join
+                    dimensions.school sch on ts.school_id = sch.school_id
+                    where
+                    ts.date between startDate AND endDate and ts.cluster_id = {cluster_id}
+                    group by
+                    TO_CHAR(ts.date, 'YYYY-MM-DD')
+                    ORDER BY
+                    TO_CHAR(ts.date, 'YYYY-MM-DD')`
                     },
                     "level": "school"
                 }

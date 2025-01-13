@@ -1813,7 +1813,7 @@ student_attendance_bignumber1: {
     ],
     "options": {
         "bigNumber": {
-            "title": "Connected on 21/02/2024",
+            "title": "Connected",
             "valueSuffix": '%',
             "property": 'connected_perc'
         }
@@ -1851,7 +1851,7 @@ student_attendance_bignumber2: {
     ],
     "options": {
         "bigNumber": {
-            "title": "Not Connected on 21/02/2024",
+            "title": "Not Connected",
             "valueSuffix": '%',
             "property": 'not_connected_perc'
         }
